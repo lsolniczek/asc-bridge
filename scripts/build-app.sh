@@ -16,6 +16,11 @@ app_path="$project_dir/dist/ASC Bridge.app"
 mkdir -p "$app_path/Contents/MacOS" "$app_path/Contents/Resources"
 cp "$binary_dir/ASCBridge" "$app_path/Contents/MacOS/ASCBridge"
 cp "$project_dir/Resources/Info.plist" "$app_path/Contents/Info.plist"
+for resource_bundle in "$binary_dir"/*.bundle; do
+    if [[ -d "$resource_bundle" ]]; then
+        cp -R "$resource_bundle" "$app_path/Contents/Resources/"
+    fi
+done
 swift "$project_dir/scripts/make-icon.swift" "$project_dir/dist/AppIcon.iconset"
 iconutil -c icns "$project_dir/dist/AppIcon.iconset" -o "$app_path/Contents/Resources/AppIcon.icns"
 codesign --force --sign "${ASC_BRIDGE_SIGN_IDENTITY:--}" --options runtime "$app_path"

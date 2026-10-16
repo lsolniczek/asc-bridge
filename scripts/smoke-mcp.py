@@ -61,8 +61,19 @@ def main():
             process = subprocess.Popen([str(executable), "--smoke-server", "--audit-file", str(audit_file)],
                                        stdout=subprocess.PIPE, stderr=stderr)
             try:
-                ready, _, _ = select.select([process.stdout], [], [], 30)
-                assert ready and process.stdout.readline().strip() == b"SMOKE_READY", "MCP server did not bind"
+                deadline = time.monotonic() + 30
+                bound = False
+                while time.monotonic() < deadline:
+                    ready, _, _ = select.select([process.stdout], [], [], max(0, deadline - time.monotonic()))
+                    if not ready:
+                        break
+                    line = process.stdout.readline()
+                    if line.strip() == b"SMOKE_READY":
+                        bound = True
+                        break
+                    if not line:
+                        break
+                assert bound, "MCP server did not bind"
                 initialized = rpc("initialize", {"protocolVersion": "2025-11-25", "capabilities": {},
                     "clientInfo": {"name": "asc-bridge-smoke", "version": "1.0"}})
                 assert "tools" in initialized["result"]["capabilities"]
