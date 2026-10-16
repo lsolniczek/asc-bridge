@@ -25,6 +25,7 @@ enum ASCBridgeMain {
         NSApplication.shared.appearance = NSAppearance(named: .aqua)
         let content = ConnectionView(model: AppModel())
             .frame(width: 820, height: 740)
+            .background(Color(nsColor: .windowBackgroundColor))
             .environment(\.colorScheme, .light)
         let view = NSHostingView(rootView: content)
         view.frame = NSRect(x: 0, y: 0, width: 820, height: 740)
