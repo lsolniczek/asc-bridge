@@ -1,0 +1,16 @@
+name: Check
+on:
+  push:
+  pull_request:
+
+jobs:
+  macos:
+    runs-on: macos-26
+    steps:
+      - uses: actions/checkout@v4
+      - name: Swift toolchain
+        run: swift --version
+      - name: Tests, release build, architecture and MCP smoke
+        run: ./scripts/check.sh
+      - name: Build native app bundle
+        run: ./scripts/build-app.sh
