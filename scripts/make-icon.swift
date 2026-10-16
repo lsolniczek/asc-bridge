@@ -9,6 +9,7 @@ let background = NSBezierPath(roundedRect: NSRect(x: 48, y: 48, width: 928, heig
 NSGradient(starting: NSColor(red: 0.22, green: 0.52, blue: 0.98, alpha: 1),
            ending: NSColor(red: 0.10, green: 0.26, blue: 0.74, alpha: 1))!.draw(in: background, angle: -90)
 let symbol = NSImage(systemSymbolName: "link", accessibilityDescription: nil)!
+    .withSymbolConfiguration(.init(pointSize: 500, weight: .medium))!
 let whiteSymbol = NSImage(size: symbol.size)
 whiteSymbol.lockFocus()
 symbol.draw(at: .zero, from: .zero, operation: .sourceOver, fraction: 1)

@@ -3,7 +3,7 @@ import SwiftUI
 
 struct MainView: View {
     @ObservedObject var model: AppModel
-    @State private var selection: Section = .connection
+    @State private var selection: Section? = .connection
 
     private enum Section: Hashable { case connection, history }
 
@@ -35,10 +35,8 @@ struct MainView: View {
             }
             .navigationSplitViewColumnWidth(min: 190, ideal: 215, max: 250)
         } detail: {
-            switch selection {
-            case .connection: ConnectionView(model: model)
-            case .history: HistoryView(model: model)
-            }
+            if selection == .history { HistoryView(model: model) }
+            else { ConnectionView(model: model) }
         }
         .task {
             while !Task.isCancelled {
@@ -123,16 +121,20 @@ struct ConnectionView: View {
                     }
                     .padding(12)
                 }
-                if let message = model.notice {
-                    Label(message, systemImage: model.noticeIsError ? "exclamationmark.circle.fill" : "checkmark.circle.fill")
-                        .foregroundStyle(model.noticeIsError ? .red : .green)
-                        .font(.callout).textSelection(.enabled)
-                }
                 if let error = model.serverError {
                     Label(error, systemImage: "exclamationmark.triangle.fill").foregroundStyle(.red).font(.callout)
                 }
             }
             .padding(32).frame(maxWidth: 900, alignment: .leading)
+        }
+        .safeAreaInset(edge: .bottom) {
+            if let message = model.notice {
+                Label(message, systemImage: model.noticeIsError ? "exclamationmark.circle.fill" : "checkmark.circle.fill")
+                    .foregroundStyle(model.noticeIsError ? .red : .green)
+                    .font(.callout).textSelection(.enabled)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(16).background(.bar)
+            }
         }
     }
 
@@ -146,6 +148,6 @@ struct ConnectionView: View {
             Spacer(minLength: 0)
         }
         .padding(16).frame(maxWidth: .infinity, alignment: .leading)
-        .background(.quaternary.opacity(0.45), in: RoundedRectangle(cornerRadius: 10))
+        .background(Color.secondary.opacity(0.08), in: RoundedRectangle(cornerRadius: 10))
     }
 }
