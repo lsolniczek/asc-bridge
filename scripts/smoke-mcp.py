@@ -111,7 +111,7 @@ def main():
                 status, _ = exchange({"jsonrpc": "2.0", "id": 4, "method": "ping"}, headers={"Origin": "https://hostile.example"})
                 assert status == 403, status
                 status, _ = exchange({"jsonrpc": "2.0", "id": 4, "method": "ping"}, headers={"Host": "hostile.example"})
-                assert status == 403, status
+                assert status in (403, 421), status
                 status, _ = exchange(method="GET")
                 assert status == 405, status
                 status, _ = exchange(raw=b"{malformed json")

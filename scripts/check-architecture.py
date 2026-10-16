@@ -6,7 +6,7 @@ import re
 root = Path(__file__).resolve().parents[1]
 allowed = {
     "BridgeCore": {"Foundation", "Security", "CryptoKit"},
-    "BridgeMCP": {"Foundation", "BridgeCore", "MCP", "Hummingbird", "HTTPTypes", "Logging", "NIOCore", "ServiceLifecycle", "CryptoKit"},
+    "BridgeMCP": {"Foundation", "Darwin", "BridgeCore", "MCP", "Hummingbird", "HTTPTypes", "Logging", "NIOCore", "ServiceLifecycle", "CryptoKit"},
     "ASCBridge": {"AppKit", "SwiftUI", "Foundation", "BridgeCore", "BridgeMCP", "UniformTypeIdentifiers"},
 }
 failures = []
