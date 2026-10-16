@@ -142,9 +142,23 @@ private let fixedNow = Date(timeIntervalSince1970: 1_700_000_000)
         (.updateLocalization, ["localizationId": .string("l1"), "whatsNew": .number(4)]),
     ]
     for (operation, arguments) in cases {
-        await #expect(throws: BridgeError.self) {
-            try await client.call(operation, arguments: arguments)
+        do {
+            _ = try await client.call(operation, arguments: arguments)
+            Issue.record("Expected invalidInput for \(operation.rawValue)")
+        } catch BridgeError.invalidInput {
+            // The validation layer must reject each input before credentials are loaded.
+        } catch {
+            Issue.record("Expected invalidInput for \(operation.rawValue)")
         }
+    }
+
+    do {
+        _ = try await client.call(.listApps, arguments: [:])
+        Issue.record("Expected credentialsMissing for a valid request")
+    } catch BridgeError.credentialsMissing {
+        // A valid request proceeds to credential lookup.
+    } catch {
+        Issue.record("Expected credentialsMissing for a valid request")
     }
 }
 
