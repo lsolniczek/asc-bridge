@@ -1,16 +1,39 @@
-name: Check
+name: Checks
+
 on:
-  push:
   pull_request:
+  push:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
 
 jobs:
-  macos:
+  check:
+    name: Test and build
     runs-on: macos-26
+    timeout-minutes: 45
+    env:
+      # GitHub's macOS 26 image keeps this alias pointed at Xcode 26.4.1.
+      DEVELOPER_DIR: /Applications/Xcode_26.4.app/Contents/Developer
     steps:
-      - uses: actions/checkout@v4
-      - name: Swift toolchain
-        run: swift --version
-      - name: Tests, release build, architecture and MCP smoke
+      - name: Check out source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Show Apple toolchain
+        run: |
+          xcode-select -p
+          xcodebuild -version
+          swift --version
+
+      - name: Run checks
         run: ./scripts/check.sh
-      - name: Build native app bundle
+
+      - name: Build macOS app
         run: ./scripts/build-app.sh

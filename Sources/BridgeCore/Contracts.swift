@@ -73,10 +73,30 @@ public enum ASCOperation: String, CaseIterable, Sendable {
     case createVersion = "asc_create_version"
     case createLocalization = "asc_create_localization"
     case updateLocalization = "asc_update_localization"
+    case getApp = "asc_get_app"
+    case getVersion = "asc_get_version"
+    case listAppInfos = "asc_list_app_infos"
+    case listAppInfoLocalizations = "asc_list_app_info_localizations"
+    case createAppInfoLocalization = "asc_create_app_info_localization"
+    case updateAppInfoLocalization = "asc_update_app_info_localization"
+    case listBuilds = "asc_list_builds"
+    case getBuild = "asc_get_build"
+    case getVersionBuild = "asc_get_version_build"
+    case setVersionBuild = "asc_set_version_build"
+    case listBetaGroups = "asc_list_beta_groups"
+    case listBetaBuildLocalizations = "asc_list_beta_build_localizations"
+    case createBetaBuildLocalization = "asc_create_beta_build_localization"
+    case updateBetaBuildLocalization = "asc_update_beta_build_localization"
+    case listCustomerReviews = "asc_list_customer_reviews"
+    case getCustomerReviewResponse = "asc_get_customer_review_response"
+    case upsertCustomerReviewResponse = "asc_upsert_customer_review_response"
 
     public var isMutation: Bool {
         switch self {
-        case .createVersion, .createLocalization, .updateLocalization: true
+        case .createVersion, .createLocalization, .updateLocalization,
+             .createAppInfoLocalization, .updateAppInfoLocalization, .setVersionBuild,
+             .createBetaBuildLocalization, .updateBetaBuildLocalization,
+             .upsertCustomerReviewResponse: true
         default: false
         }
     }

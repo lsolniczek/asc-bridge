@@ -66,6 +66,10 @@ public actor ASCClient: ASCServing {
             throw BridgeError.apple(status: response.statusCode, message: Self.appleErrorMessage(response.data))
         }
 
+        if response.statusCode == 204, plan.emptySuccess {
+            return .object(["data": .null, "nextCursor": .null])
+        }
+
         let decoded: JSONValue
         do {
             decoded = try JSONDecoder().decode(JSONValue.self, from: response.data)
@@ -73,6 +77,9 @@ public actor ASCClient: ASCServing {
             throw BridgeError.transport("App Store Connect returned an unreadable response.")
         }
         guard case .object(let object) = decoded, let data = object["data"] else {
+            throw BridgeError.transport("App Store Connect returned a response without resource data.")
+        }
+        if data == .null, !plan.nullDataAllowed {
             throw BridgeError.transport("App Store Connect returned a response without resource data.")
         }
 
@@ -217,6 +224,24 @@ private struct RequestPlan {
     let path: String
     let query: [(String, String)]
     let body: JSONValue?
+    let nullDataAllowed: Bool
+    let emptySuccess: Bool
+
+    init(
+        method: String,
+        path: String,
+        query: [(String, String)],
+        body: JSONValue?,
+        nullDataAllowed: Bool = false,
+        emptySuccess: Bool = false
+    ) {
+        self.method = method
+        self.path = path
+        self.query = query
+        self.body = body
+        self.nullDataAllowed = nullDataAllowed
+        self.emptySuccess = emptySuccess
+    }
 
     static func make(operation: ASCOperation, arguments: [String: JSONValue]) throws -> RequestPlan {
         switch operation {
@@ -262,7 +287,7 @@ private struct RequestPlan {
             return RequestPlan(method: "POST", path: "/v1/appStoreVersions", query: [], body: body)
 
         case .createLocalization:
-            try allow(arguments, keys: ["versionId", "locale", "description", "whatsNew", "promotionalText"])
+            try allow(arguments, keys: ["versionId", "locale", "description", "whatsNew", "promotionalText", "keywords", "marketingUrl", "supportUrl"])
             let versionID = try identifier(arguments, "versionId")
             let locale = try localeValue(requiredString(arguments, "locale"))
             let attributes = try localizationAttributes(arguments, includeLocale: locale)
@@ -276,11 +301,11 @@ private struct RequestPlan {
             return RequestPlan(method: "POST", path: "/v1/appStoreVersionLocalizations", query: [], body: body)
 
         case .updateLocalization:
-            try allow(arguments, keys: ["localizationId", "description", "whatsNew", "promotionalText"])
+            try allow(arguments, keys: ["localizationId", "description", "whatsNew", "promotionalText", "keywords", "marketingUrl", "supportUrl"])
             let localizationID = try identifier(arguments, "localizationId")
             let attributes = try localizationAttributes(arguments, includeLocale: nil)
             guard !attributes.isEmpty else {
-                throw BridgeError.invalidInput("Provide at least one of description, whatsNew, or promotionalText.")
+                throw BridgeError.invalidInput("Provide at least one localization metadata field.")
             }
             let body: JSONValue = .object(["data": .object([
                 "type": .string("appStoreVersionLocalizations"),
@@ -288,6 +313,192 @@ private struct RequestPlan {
                 "attributes": .object(attributes),
             ])])
             return RequestPlan(method: "PATCH", path: "/v1/appStoreVersionLocalizations/\(localizationID)", query: [], body: body)
+
+        case .getApp:
+            try allow(arguments, keys: ["appId"])
+            let appID = try identifier(arguments, "appId")
+            return RequestPlan(method: "GET", path: "/v1/apps/\(appID)", query: [], body: nil)
+
+        case .getVersion:
+            try allow(arguments, keys: ["versionId"])
+            let versionID = try identifier(arguments, "versionId")
+            return RequestPlan(method: "GET", path: "/v1/appStoreVersions/\(versionID)", query: [], body: nil)
+
+        case .listAppInfos:
+            try allow(arguments, keys: ["appId", "limit", "cursor"])
+            let appID = try identifier(arguments, "appId")
+            return RequestPlan(method: "GET", path: "/v1/apps/\(appID)/appInfos", query: try pagination(arguments), body: nil)
+
+        case .listAppInfoLocalizations:
+            try allow(arguments, keys: ["appInfoId", "limit", "cursor"])
+            let appInfoID = try identifier(arguments, "appInfoId")
+            return RequestPlan(method: "GET", path: "/v1/appInfos/\(appInfoID)/appInfoLocalizations", query: try pagination(arguments), body: nil)
+
+        case .createAppInfoLocalization:
+            try allow(arguments, keys: ["appInfoId", "locale", "name", "subtitle", "privacyPolicyUrl", "privacyChoicesUrl", "privacyPolicyText"])
+            let appInfoID = try identifier(arguments, "appInfoId")
+            let locale = try localeValue(requiredString(arguments, "locale"))
+            var attributes: [String: JSONValue] = [
+                "locale": .string(locale),
+                "name": .string(try metadataName(requiredString(arguments, "name"))),
+            ]
+            try addTextAttribute("subtitle", from: arguments, to: &attributes, maximum: 30)
+            try addURLAttribute("privacyPolicyUrl", from: arguments, to: &attributes)
+            try addURLAttribute("privacyChoicesUrl", from: arguments, to: &attributes)
+            try addTextAttribute("privacyPolicyText", from: arguments, to: &attributes, maximum: 4_000)
+            let body = relatedCreateBody(
+                type: "appInfoLocalizations", attributes: attributes,
+                relationship: "appInfo", relatedType: "appInfos", relatedID: appInfoID
+            )
+            return RequestPlan(method: "POST", path: "/v1/appInfoLocalizations", query: [], body: body)
+
+        case .updateAppInfoLocalization:
+            try allow(arguments, keys: ["appInfoLocalizationId", "name", "subtitle", "privacyPolicyUrl", "privacyChoicesUrl", "privacyPolicyText"])
+            let localizationID = try identifier(arguments, "appInfoLocalizationId")
+            var attributes: [String: JSONValue] = [:]
+            if let name = try optionalString(arguments, "name") {
+                attributes["name"] = .string(try metadataName(name))
+            }
+            try addTextAttribute("subtitle", from: arguments, to: &attributes, maximum: 30)
+            try addURLAttribute("privacyPolicyUrl", from: arguments, to: &attributes)
+            try addURLAttribute("privacyChoicesUrl", from: arguments, to: &attributes)
+            try addTextAttribute("privacyPolicyText", from: arguments, to: &attributes, maximum: 4_000)
+            guard !attributes.isEmpty else {
+                throw BridgeError.invalidInput("Provide at least one app info localization metadata field.")
+            }
+            let body: JSONValue = .object(["data": .object([
+                "type": .string("appInfoLocalizations"),
+                "id": .string(localizationID),
+                "attributes": .object(attributes),
+            ])])
+            return RequestPlan(method: "PATCH", path: "/v1/appInfoLocalizations/\(localizationID)", query: [], body: body)
+
+        case .listBuilds:
+            try allow(arguments, keys: ["appId", "platform", "buildNumber", "marketingVersion", "processingState", "sort", "limit", "cursor"])
+            let appID = try identifier(arguments, "appId")
+            var query = try pagination(arguments)
+            query.append(("filter[app]", appID))
+            if let platform = try optionalString(arguments, "platform") {
+                query.append(("filter[preReleaseVersion.platform]", try platformValue(platform)))
+            }
+            if let buildNumber = try optionalString(arguments, "buildNumber") {
+                query.append(("filter[version]", try visibleFilter(buildNumber, field: "buildNumber")))
+            }
+            if let marketingVersion = try optionalString(arguments, "marketingVersion") {
+                query.append(("filter[preReleaseVersion.version]", try visibleFilter(marketingVersion, field: "marketingVersion")))
+            }
+            if let processingState = try optionalString(arguments, "processingState") {
+                let allowed = ["PROCESSING", "FAILED", "INVALID", "VALID"]
+                guard allowed.contains(processingState) else {
+                    throw BridgeError.invalidInput("processingState must be PROCESSING, FAILED, INVALID, or VALID.")
+                }
+                query.append(("filter[processingState]", processingState))
+            }
+            if let sort = try optionalString(arguments, "sort") {
+                query.append(("sort", try enumValue(sort, allowed: ["version", "-version", "uploadedDate", "-uploadedDate", "preReleaseVersion", "-preReleaseVersion"], field: "sort")))
+            } else {
+                query.append(("sort", "-uploadedDate"))
+            }
+            return RequestPlan(method: "GET", path: "/v1/builds", query: query, body: nil)
+
+        case .getBuild:
+            try allow(arguments, keys: ["buildId"])
+            let buildID = try identifier(arguments, "buildId")
+            return RequestPlan(method: "GET", path: "/v1/builds/\(buildID)", query: [], body: nil)
+
+        case .getVersionBuild:
+            try allow(arguments, keys: ["versionId"])
+            let versionID = try identifier(arguments, "versionId")
+            return RequestPlan(method: "GET", path: "/v1/appStoreVersions/\(versionID)/build", query: [], body: nil, nullDataAllowed: true)
+
+        case .setVersionBuild:
+            try allow(arguments, keys: ["versionId", "buildId"])
+            let versionID = try identifier(arguments, "versionId")
+            let buildID = try identifier(arguments, "buildId")
+            let body: JSONValue = .object(["data": .object([
+                "type": .string("builds"), "id": .string(buildID),
+            ])])
+            return RequestPlan(
+                method: "PATCH", path: "/v1/appStoreVersions/\(versionID)/relationships/build",
+                query: [], body: body, emptySuccess: true
+            )
+
+        case .listBetaGroups:
+            try allow(arguments, keys: ["appId", "limit", "cursor"])
+            let appID = try identifier(arguments, "appId")
+            var query = try pagination(arguments)
+            query.append(("fields[betaGroups]", "name,createdDate,isInternalGroup,hasAccessToAllBuilds,publicLinkEnabled,feedbackEnabled"))
+            return RequestPlan(method: "GET", path: "/v1/apps/\(appID)/betaGroups", query: query, body: nil)
+
+        case .listBetaBuildLocalizations:
+            try allow(arguments, keys: ["buildId", "limit", "cursor"])
+            let buildID = try identifier(arguments, "buildId")
+            return RequestPlan(method: "GET", path: "/v1/builds/\(buildID)/betaBuildLocalizations", query: try pagination(arguments), body: nil)
+
+        case .createBetaBuildLocalization:
+            try allow(arguments, keys: ["buildId", "locale", "whatsNew"])
+            let buildID = try identifier(arguments, "buildId")
+            let locale = try localeValue(requiredString(arguments, "locale"))
+            var attributes: [String: JSONValue] = ["locale": .string(locale)]
+            try addTextAttribute("whatsNew", from: arguments, to: &attributes, maximum: 4_000)
+            let body = relatedCreateBody(
+                type: "betaBuildLocalizations", attributes: attributes,
+                relationship: "build", relatedType: "builds", relatedID: buildID
+            )
+            return RequestPlan(method: "POST", path: "/v1/betaBuildLocalizations", query: [], body: body)
+
+        case .updateBetaBuildLocalization:
+            try allow(arguments, keys: ["betaBuildLocalizationId", "whatsNew"])
+            let localizationID = try identifier(arguments, "betaBuildLocalizationId")
+            let whatsNew = try boundedText(requiredString(arguments, "whatsNew"), field: "whatsNew", maximum: 4_000)
+            let body: JSONValue = .object(["data": .object([
+                "type": .string("betaBuildLocalizations"),
+                "id": .string(localizationID),
+                "attributes": .object(["whatsNew": .string(whatsNew)]),
+            ])])
+            return RequestPlan(method: "PATCH", path: "/v1/betaBuildLocalizations/\(localizationID)", query: [], body: body)
+
+        case .listCustomerReviews:
+            try allow(arguments, keys: ["appId", "territory", "rating", "sort", "limit", "cursor"])
+            let appID = try identifier(arguments, "appId")
+            var query = try pagination(arguments)
+            if let territory = try optionalString(arguments, "territory") {
+                guard territory.range(of: "^[A-Z]{3}$", options: .regularExpression) != nil else {
+                    throw BridgeError.invalidInput("territory must be a three-letter uppercase country code.")
+                }
+                query.append(("filter[territory]", territory))
+            }
+            if let rating = arguments["rating"] {
+                guard let integer = rating.intValue, (1...5).contains(integer) else {
+                    throw BridgeError.invalidInput("rating must be an integer from 1 to 5.")
+                }
+                query.append(("filter[rating]", String(integer)))
+            }
+            if let sort = try optionalString(arguments, "sort") {
+                query.append(("sort", try enumValue(sort, allowed: ["rating", "-rating", "createdDate", "-createdDate"], field: "sort")))
+            } else {
+                query.append(("sort", "-createdDate"))
+            }
+            return RequestPlan(method: "GET", path: "/v1/apps/\(appID)/customerReviews", query: query, body: nil)
+
+        case .getCustomerReviewResponse:
+            try allow(arguments, keys: ["reviewId"])
+            let reviewID = try identifier(arguments, "reviewId")
+            return RequestPlan(method: "GET", path: "/v1/customerReviews/\(reviewID)/response", query: [], body: nil, nullDataAllowed: true)
+
+        case .upsertCustomerReviewResponse:
+            try allow(arguments, keys: ["reviewId", "responseBody"])
+            let reviewID = try identifier(arguments, "reviewId")
+            let responseBody = try boundedText(requiredString(arguments, "responseBody"), field: "responseBody", maximum: 5_970)
+            guard !responseBody.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
+                throw BridgeError.invalidInput("responseBody must not be empty or whitespace only.")
+            }
+            let body = relatedCreateBody(
+                type: "customerReviewResponses",
+                attributes: ["responseBody": .string(responseBody)],
+                relationship: "review", relatedType: "customerReviews", relatedID: reviewID
+            )
+            return RequestPlan(method: "POST", path: "/v1/customerReviewResponses", query: [], body: body)
         }
     }
 
@@ -295,6 +506,22 @@ private struct RequestPlan {
         if arguments.keys.contains(where: { !keys.contains($0) }) {
             throw BridgeError.invalidInput("The request contains an unknown argument.")
         }
+    }
+
+    private static func relatedCreateBody(
+        type: String,
+        attributes: [String: JSONValue],
+        relationship: String,
+        relatedType: String,
+        relatedID: String
+    ) -> JSONValue {
+        .object(["data": .object([
+            "type": .string(type),
+            "attributes": .object(attributes),
+            "relationships": .object([relationship: .object(["data": .object([
+                "type": .string(relatedType), "id": .string(relatedID),
+            ])])]),
+        ])])
     }
 
     private static func requiredString(_ arguments: [String: JSONValue], _ key: String) throws -> String {
@@ -348,8 +575,9 @@ private struct RequestPlan {
     }
 
     private static func localeValue(_ value: String) throws -> String {
-        guard value.range(of: "^[A-Za-z]{2,3}(?:-[A-Za-z0-9]{2,8})*$", options: .regularExpression) != nil else {
-            throw BridgeError.invalidInput("locale must be an App Store Connect locale code such as en-US or zh-Hans.")
+        guard value.count <= 20,
+              value.range(of: "^[A-Za-z]{2,3}(?:-[A-Za-z0-9]{2,8})*$", options: .regularExpression) != nil else {
+            throw BridgeError.invalidInput("locale must be a valid App Store Connect locale code of at most 20 characters.")
         }
         return value
     }
@@ -363,16 +591,97 @@ private struct RequestPlan {
         let bounds = ["description": 4_000, "whatsNew": 4_000, "promotionalText": 170]
         for (key, maximum) in bounds {
             if let value = try optionalString(arguments, key) {
-                guard value.count <= maximum else {
-                    throw BridgeError.invalidInput("\(key) must be at most \(maximum) characters.")
-                }
-                guard !value.unicodeScalars.contains(where: { CharacterSet.controlCharacters.contains($0) && $0 != "\n" && $0 != "\r" && $0 != "\t" }) else {
-                    throw BridgeError.invalidInput("\(key) contains unsupported control characters.")
-                }
-                attributes[key] = .string(value)
+                attributes[key] = .string(try boundedText(value, field: key, maximum: maximum))
             }
         }
+        if let keywords = try optionalString(arguments, "keywords") {
+            guard keywords.utf8.count <= 100 else {
+                throw BridgeError.invalidInput("keywords must be at most 100 UTF-8 bytes.")
+            }
+            try validateTextControls(keywords, field: "keywords")
+            attributes["keywords"] = .string(keywords)
+        }
+        try addURLAttribute("marketingUrl", from: arguments, to: &attributes)
+        try addURLAttribute("supportUrl", from: arguments, to: &attributes)
         return attributes
+    }
+
+    private static func addTextAttribute(
+        _ key: String,
+        from arguments: [String: JSONValue],
+        to attributes: inout [String: JSONValue],
+        maximum: Int
+    ) throws {
+        if let value = try optionalString(arguments, key) {
+            attributes[key] = .string(try boundedText(value, field: key, maximum: maximum))
+        }
+    }
+
+    private static func addURLAttribute(
+        _ key: String,
+        from arguments: [String: JSONValue],
+        to attributes: inout [String: JSONValue]
+    ) throws {
+        if let value = try optionalString(arguments, key) {
+            attributes[key] = .string(try validatedURL(value, field: key))
+        }
+    }
+
+    private static func metadataName(_ value: String) throws -> String {
+        guard (2...30).contains(value.count),
+              !value.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty,
+              !value.unicodeScalars.contains(where: CharacterSet.controlCharacters.contains) else {
+            throw BridgeError.invalidInput("name must contain 2 to 30 visible characters.")
+        }
+        return value
+    }
+
+    private static func boundedText(_ value: String, field: String, maximum: Int) throws -> String {
+        guard value.count <= maximum else {
+            throw BridgeError.invalidInput("\(field) must be at most \(maximum) characters.")
+        }
+        try validateTextControls(value, field: field)
+        return value
+    }
+
+    private static func validateTextControls(_ value: String, field: String) throws {
+        guard !value.unicodeScalars.contains(where: {
+            CharacterSet.controlCharacters.contains($0) && $0 != "\n" && $0 != "\r" && $0 != "\t"
+        }) else {
+            throw BridgeError.invalidInput("\(field) contains unsupported control characters.")
+        }
+    }
+
+    private static func validatedURL(_ value: String, field: String) throws -> String {
+        guard value.count <= 2_000 else {
+            throw BridgeError.invalidInput("\(field) must be at most 2000 characters.")
+        }
+        if value.isEmpty { return value }
+        guard !value.unicodeScalars.contains(where: { CharacterSet.whitespacesAndNewlines.contains($0) || CharacterSet.controlCharacters.contains($0) }),
+              let components = URLComponents(string: value),
+              let scheme = components.scheme?.lowercased(), ["http", "https"].contains(scheme),
+              let host = components.host, !host.isEmpty,
+              components.user == nil, components.password == nil,
+              components.url != nil else {
+            throw BridgeError.invalidInput("\(field) must be an absolute HTTP or HTTPS URL without credentials or whitespace.")
+        }
+        return value
+    }
+
+    private static func visibleFilter(_ value: String, field: String) throws -> String {
+        guard (1...100).contains(value.count),
+              !value.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty,
+              !value.unicodeScalars.contains(where: CharacterSet.controlCharacters.contains) else {
+            throw BridgeError.invalidInput("\(field) must contain 1 to 100 visible characters.")
+        }
+        return value
+    }
+
+    private static func enumValue(_ value: String, allowed: [String], field: String) throws -> String {
+        guard allowed.contains(value) else {
+            throw BridgeError.invalidInput("\(field) must be one of the supported values.")
+        }
+        return value
     }
 }
 

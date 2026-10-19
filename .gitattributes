@@ -1,0 +1,5 @@
+* text=auto eol=lf
+*.png binary
+*.icns binary
+# Preserve upstream license text, including its original whitespace.
+THIRD_PARTY_NOTICES.md -whitespace

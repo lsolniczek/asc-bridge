@@ -8,4 +8,17 @@ dist/
 *.jsonl
 .env*
 __pycache__/
+*.pyc
+*.log
+*.p12
+*.pfx
+*.cer
+*.mobileprovision
+*.provisionprofile
+*.xcuserstate
+xcuserdata/
+DerivedData/
+*.xcarchive/
+*.xcresult/
+*.dSYM/
 

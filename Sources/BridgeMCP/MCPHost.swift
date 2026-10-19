@@ -122,7 +122,7 @@ public actor MCPHost {
         let server = Server(
             name: "ASCBridge",
             version: "0.1.0",
-            instructions: "Use the typed App Store Connect tools to inspect apps and manage version metadata.",
+            instructions: "Use the typed App Store Connect tools to inspect apps, versions, builds, TestFlight groups and customer reviews, manage localized metadata, attach builds, and write public review replies.",
             capabilities: .init(tools: .init())
         )
 

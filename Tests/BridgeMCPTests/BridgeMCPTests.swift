@@ -104,13 +104,10 @@ private let fixturePEM = "-----BEGIN PRIVATE KEY-----\nfake-private-material\n--
     } catch { }
 }
 
-@Test func toolCatalogExposesOnlySixClosedSchemasWithAnnotations() throws {
+@Test func toolCatalogExposesTwentyThreeClosedSchemasWithAnnotations() throws {
     let tools = ToolCatalog.tools()
-    #expect(Set(tools.map(\.name)) == Set([
-        "asc_list_apps", "asc_list_versions", "asc_list_localizations",
-        "asc_create_version", "asc_create_localization", "asc_update_localization",
-    ]))
-    #expect(tools.count == 6)
+    #expect(Set(tools.map(\.name)) == Set(ASCOperation.allCases.map(\.rawValue)))
+    #expect(tools.count == 23)
 
     for tool in tools {
         guard case .object(let schema) = tool.inputSchema else {
@@ -120,6 +117,12 @@ private let fixturePEM = "-----BEGIN PRIVATE KEY-----\nfake-private-material\n--
         #expect(schema["type"] == .string("object"))
         #expect(schema["additionalProperties"] == .bool(false))
         #expect(schema["properties"]?.objectValue != nil)
+        #expect(schema["required"]?.arrayValue != nil)
+        if let operation = ASCOperation(rawValue: tool.name) {
+            #expect(tool.annotations.readOnlyHint == !operation.isMutation)
+        } else {
+            Issue.record("Unexpected tool name: \(tool.name)")
+        }
     }
 
     let readTool = try #require(tools.first { $0.name == "asc_list_apps" })
@@ -130,6 +133,43 @@ private let fixturePEM = "-----BEGIN PRIVATE KEY-----\nfake-private-material\n--
     #expect(mutation.annotations.readOnlyHint == false)
     let mutationSchema = try #require(mutation.inputSchema.objectValue?["properties"]?.objectValue)
     #expect(mutationSchema["localizationId"]?.objectValue?["maxLength"] == .int(128))
+    #expect(mutationSchema["keywords"]?.objectValue?["maxLength"] == .int(100))
+    #expect(mutationSchema["marketingUrl"]?.objectValue?["maxLength"] == .int(2_000))
+    #expect(mutationSchema["marketingUrl"]?.objectValue?["format"] == nil)
+
+    let builds = try #require(tools.first { $0.name == "asc_list_builds" })
+    let buildFields = try #require(builds.inputSchema.objectValue?["properties"]?.objectValue)
+    #expect(buildFields["processingState"]?.objectValue?["enum"] == .array(["PROCESSING", "FAILED", "INVALID", "VALID"].map(MCP.Value.string)))
+    #expect(buildFields["sort"]?.objectValue?["enum"] == .array(["version", "-version", "uploadedDate", "-uploadedDate", "preReleaseVersion", "-preReleaseVersion"].map(MCP.Value.string)))
+
+    let reviews = try #require(tools.first { $0.name == "asc_list_customer_reviews" })
+    let reviewFields = try #require(reviews.inputSchema.objectValue?["properties"]?.objectValue)
+    #expect(reviewFields["rating"]?.objectValue?["type"] == .string("integer"))
+    #expect(reviewFields["rating"]?.objectValue?["minimum"] == .int(1))
+    #expect(reviewFields["rating"]?.objectValue?["maximum"] == .int(5))
+    #expect(reviewFields["territory"]?.objectValue?["pattern"] == .string("^[A-Z]{3}$"))
+
+    let reply = try #require(tools.first { $0.name == "asc_upsert_customer_review_response" })
+    let replyFields = try #require(reply.inputSchema.objectValue?["properties"]?.objectValue)
+    #expect(replyFields["responseBody"]?.objectValue?["maxLength"] == .int(5_970))
+    #expect(reply.annotations.readOnlyHint == false)
+    #expect(reply.annotations.destructiveHint == true)
+    #expect(reply.annotations.idempotentHint == false)
+
+    let create = try #require(tools.first { $0.name == "asc_create_beta_build_localization" })
+    #expect(create.annotations.readOnlyHint == false)
+    #expect(create.annotations.destructiveHint == false)
+    #expect(create.annotations.idempotentHint == false)
+    let setBuild = try #require(tools.first { $0.name == "asc_set_version_build" })
+    #expect(setBuild.annotations.readOnlyHint == false)
+    #expect(setBuild.annotations.destructiveHint == true)
+    #expect(setBuild.annotations.idempotentHint == true)
+    let updateInfo = try #require(tools.first { $0.name == "asc_update_app_info_localization" })
+    #expect(updateInfo.annotations.destructiveHint == true)
+    #expect(updateInfo.annotations.idempotentHint == true)
+    let updateBeta = try #require(tools.first { $0.name == "asc_update_beta_build_localization" })
+    #expect(updateBeta.annotations.destructiveHint == true)
+    #expect(updateBeta.annotations.idempotentHint == true)
 }
 
 @Test func eachToolMapsToItsTypedASCOperationAndSanitizesReturnedContent() async throws {
@@ -139,8 +179,25 @@ private let fixturePEM = "-----BEGIN PRIVATE KEY-----\nfake-private-material\n--
         ("asc_list_versions", ["appId": .string("app-1"), "platform": .string("IOS")]),
         ("asc_list_localizations", ["versionId": .string("version-1"), "limit": .int(5)]),
         ("asc_create_version", ["appId": .string("app-1"), "platform": .string("MAC_OS"), "versionString": .string("2.4.0")]),
-        ("asc_create_localization", ["versionId": .string("version-1"), "locale": .string("pl"), "description": .string("Opis")]),
-        ("asc_update_localization", ["localizationId": .string("localization-1"), "whatsNew": .string("Poprawki")]),
+        ("asc_create_localization", ["versionId": .string("version-1"), "locale": .string("pl"), "description": .string("Opis"), "keywords": .string("app,sklep\nmobile"), "marketingUrl": .string(""), "supportUrl": .string("https://example.com/help")]),
+        ("asc_update_localization", ["localizationId": .string("localization-1"), "whatsNew": .string("Poprawki"), "keywords": .string("release"), "marketingUrl": .string("")]),
+        ("asc_get_app", ["appId": .string("app-1")]),
+        ("asc_get_version", ["versionId": .string("version-1")]),
+        ("asc_list_app_infos", ["appId": .string("app-1"), "limit": .int(25)]),
+        ("asc_list_app_info_localizations", ["appInfoId": .string("info-1"), "cursor": .string("next")]),
+        ("asc_create_app_info_localization", ["appInfoId": .string("info-1"), "locale": .string("en-US"), "name": .string("Example App"), "subtitle": .string("A useful app"), "privacyPolicyUrl": .string("https://example.com/privacy"), "privacyChoicesUrl": .string(""), "privacyPolicyText": .string("Privacy details")]),
+        ("asc_update_app_info_localization", ["appInfoLocalizationId": .string("info-loc-1"), "name": .string("Renamed App")]),
+        ("asc_list_builds", ["appId": .string("app-1"), "platform": .string("IOS"), "buildNumber": .string("42"), "marketingVersion": .string("2.4.0"), "processingState": .string("VALID"), "sort": .string("-uploadedDate"), "limit": .int(10)]),
+        ("asc_get_build", ["buildId": .string("build-1")]),
+        ("asc_get_version_build", ["versionId": .string("version-1")]),
+        ("asc_set_version_build", ["versionId": .string("version-1"), "buildId": .string("build-1")]),
+        ("asc_list_beta_groups", ["appId": .string("app-1")]),
+        ("asc_list_beta_build_localizations", ["buildId": .string("build-1")]),
+        ("asc_create_beta_build_localization", ["buildId": .string("build-1"), "locale": .string("pl"), "whatsNew": .string("Nowe możliwości")]),
+        ("asc_update_beta_build_localization", ["betaBuildLocalizationId": .string("beta-loc-1"), "whatsNew": .string("")]),
+        ("asc_list_customer_reviews", ["appId": .string("app-1"), "territory": .string("USA"), "rating": .int(4), "sort": .string("-createdDate")]),
+        ("asc_get_customer_review_response", ["reviewId": .string("review-1")]),
+        ("asc_upsert_customer_review_response", ["reviewId": .string("review-1"), "responseBody": .string("Thank you for your review.")]),
     ]
 
     for (name, arguments) in calls {
@@ -162,6 +219,12 @@ private let fixturePEM = "-----BEGIN PRIVATE KEY-----\nfake-private-material\n--
     #expect(recorded[3].arguments["versionString"] == .string("2.4.0"))
     #expect(recorded[4].arguments["locale"] == .string("pl"))
     #expect(recorded[5].arguments["whatsNew"] == .string("Poprawki"))
+    #expect(recorded[4].arguments["marketingUrl"] == .string(""))
+    #expect(recorded[4].arguments["keywords"] == .string("app,sklep\nmobile"))
+    #expect(recorded[5].arguments["supportUrl"] == nil)
+    #expect(recorded[12].arguments["processingState"] == .string("VALID"))
+    #expect(recorded[20].arguments["rating"] == .number(4))
+    #expect(recorded[22].arguments["responseBody"] == .string("Thank you for your review."))
 }
 
 @Test func invalidToolArgumentsAreRejectedWithoutCallingASC() async {
@@ -195,6 +258,35 @@ private let fixturePEM = "-----BEGIN PRIVATE KEY-----\nfake-private-material\n--
         arguments: ["cursor": .string(String(repeating: "ø", count: 1_025))]
     )
     #expect(oversizedCursor.status == "rejected")
+
+    let unsafeID = await ToolCatalog.execute(service: service, name: "asc_get_build", arguments: ["buildId": .string("build/1")])
+    #expect(unsafeID.status == "rejected")
+
+    let invalidBuildState = await ToolCatalog.execute(service: service, name: "asc_list_builds", arguments: ["appId": .string("app-1"), "processingState": .string("READY")])
+    #expect(invalidBuildState.status == "rejected")
+
+    let stringRating = await ToolCatalog.execute(service: service, name: "asc_list_customer_reviews", arguments: ["appId": .string("app-1"), "rating": .string("4")])
+    #expect(stringRating.status == "rejected")
+    let outOfRangeRating = await ToolCatalog.execute(service: service, name: "asc_list_customer_reviews", arguments: ["appId": .string("app-1"), "rating": .int(6)])
+    #expect(outOfRangeRating.status == "rejected")
+
+    let badTerritory = await ToolCatalog.execute(service: service, name: "asc_list_customer_reviews", arguments: ["appId": .string("app-1"), "territory": .string("us")])
+    #expect(badTerritory.status == "rejected")
+
+    let badURL = await ToolCatalog.execute(service: service, name: "asc_update_app_info_localization", arguments: ["appInfoLocalizationId": .string("info-loc-1"), "privacyPolicyUrl": .string("javascript:alert(1)")])
+    #expect(badURL.status == "rejected")
+
+    let oversizedKeywords = await ToolCatalog.execute(service: service, name: "asc_update_localization", arguments: ["localizationId": .string("localization-1"), "keywords": .string(String(repeating: "é", count: 51))])
+    #expect(oversizedKeywords.status == "rejected")
+
+    let emptyVersionUpdate = await ToolCatalog.execute(service: service, name: "asc_update_localization", arguments: ["localizationId": .string("localization-1")])
+    #expect(emptyVersionUpdate.status == "rejected")
+
+    let emptyAppInfoUpdate = await ToolCatalog.execute(service: service, name: "asc_update_app_info_localization", arguments: ["appInfoLocalizationId": .string("info-loc-1")])
+    #expect(emptyAppInfoUpdate.status == "rejected")
+
+    let whitespaceReply = await ToolCatalog.execute(service: service, name: "asc_upsert_customer_review_response", arguments: ["reviewId": .string("review-1"), "responseBody": .string(" \n\t")])
+    #expect(whitespaceReply.status == "rejected")
 
     let unknownTool = await ToolCatalog.execute(service: service, name: "asc_raw_http", arguments: [:])
     #expect(unknownTool.status == "rejected")
@@ -234,6 +326,19 @@ private let fixturePEM = "-----BEGIN PRIVATE KEY-----\nfake-private-material\n--
     let safeValue = try #require(safe)
     let encoded = try safeValue.encodedString()
     #expect(!encoded.contains(fixtureJWT))
+
+    let review = ToolCatalog.safeAuditParameters(
+        toolName: "asc_list_customer_reviews",
+        raw: .object([
+            "appId": .string("app-1"),
+            "rating": .number(5),
+            "territory": .string("USA"),
+            "privateKey": .string(fixturePEM),
+        ])
+    )
+    #expect(review?.objectValue?["rating"] == .number(5))
+    #expect(review?.objectValue?["territory"] == .string("USA"))
+    #expect(review?.objectValue?["privateKey"] == nil)
 }
 
 @Test func sanitizerRecognizesCamelCaseSecretFieldsWithoutRedactingOrdinaryWords() {
