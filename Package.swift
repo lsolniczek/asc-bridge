@@ -11,7 +11,7 @@ let package = Package(
     ],
     dependencies: [
         .package(url: "https://github.com/modelcontextprotocol/swift-sdk.git", exact: "0.12.1"),
-        .package(url: "https://github.com/hummingbird-project/hummingbird.git", exact: "2.20.0"),
+        .package(url: "https://github.com/hummingbird-project/hummingbird.git", exact: "2.28.0"),
     ],
     targets: [
         .target(name: "BridgeCore"),
