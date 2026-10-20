@@ -3,6 +3,7 @@ import PackageDescription
 
 let package = Package(
     name: "ASCBridge",
+    defaultLocalization: "en",
     platforms: [.macOS(.v14)],
     products: [
         .executable(name: "ASCBridge", targets: ["ASCBridge"]),
@@ -14,13 +15,14 @@ let package = Package(
         .package(url: "https://github.com/hummingbird-project/hummingbird.git", exact: "2.20.0"),
     ],
     targets: [
-        .target(name: "BridgeCore"),
+        .target(name: "BridgeCore", resources: [.process("Resources")]),
         .target(name: "BridgeMCP", dependencies: [
             "BridgeCore",
             .product(name: "MCP", package: "swift-sdk"),
             .product(name: "Hummingbird", package: "hummingbird"),
         ]),
-        .executableTarget(name: "ASCBridge", dependencies: ["BridgeCore", "BridgeMCP"]),
+        .executableTarget(name: "ASCBridge", dependencies: ["BridgeCore", "BridgeMCP"], resources: [.process("Resources")]),
+        .testTarget(name: "ASCBridgeTests", dependencies: ["ASCBridge", "BridgeCore"]),
         .testTarget(name: "BridgeCoreTests", dependencies: ["BridgeCore"]),
         .testTarget(name: "BridgeMCPTests", dependencies: [
             "BridgeCore", "BridgeMCP", .product(name: "MCP", package: "swift-sdk"),

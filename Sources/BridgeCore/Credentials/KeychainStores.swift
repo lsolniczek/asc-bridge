@@ -24,7 +24,7 @@ public actor KeychainCredentialStore: CredentialStore {
         do {
             return try JSONDecoder().decode(TeamCredentials.self, from: data)
         } catch {
-            throw BridgeError.transport("The saved App Store Connect credentials could not be read. Reimport the team key.")
+            throw BridgeError.transport(String(localized: "The saved App Store Connect credentials could not be read. Reimport the team key.", bundle: .module, comment: "Shown when saved credentials cannot be decoded. The user can import their team key again in the app."))
         }
     }
 
@@ -33,7 +33,7 @@ public actor KeychainCredentialStore: CredentialStore {
         do {
             data = try JSONEncoder().encode(credentials)
         } catch {
-            throw BridgeError.transport("The App Store Connect credentials could not be saved.")
+            throw BridgeError.transport(String(localized: "The App Store Connect credentials could not be saved.", bundle: .module, comment: "Shown when credentials cannot be encoded before saving them to Keychain."))
         }
         try await backend.write(data, service: service, account: "team-credentials")
     }

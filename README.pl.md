@@ -1,6 +1,7 @@
 # ASC Bridge
 
-[English](README.md) · [Współtworzenie](CONTRIBUTING.md) · [Licencja MIT](LICENSE)
+[English](README.md) · [Współtworzenie](CONTRIBUTING.md) ·
+[Tłumaczenia](docs/localization.md) · [Licencja MIT](LICENSE)
 
 Mała lokalna aplikacja macOS, która udostępnia App Store Connect przez MCP.
 Importujesz klucz zespołu `.p8` w aplikacji. Codex lub inny klient MCP korzysta
@@ -17,9 +18,9 @@ open "dist/ASC Bridge.app"
 ```
 
 1. W App Store Connect znajdź **Key ID** oraz **Issuer ID** klucza zespołu.
-2. W aplikacji wpisz oba identyfikatory, wybierz `.p8` i kliknij **Zapisz w Keychain**.
-3. Kliknij **Testuj zapisany klucz**.
-4. Kliknij **Skopiuj konfigurację Codexa** i dodaj ją do `~/.codex/config.toml`.
+2. W aplikacji wpisz oba identyfikatory, wybierz `.p8` i kliknij **Save to Keychain**.
+3. Kliknij **Test saved key**.
+4. Kliknij **Copy Codex configuration** i dodaj ją do `~/.codex/config.toml`.
    Odśwież serwery MCP w kliencie lub uruchom go ponownie.
 
 W innych klientach wybierz Streamable HTTP, adres `http://127.0.0.1:43129/mcp`
@@ -27,7 +28,10 @@ i nagłówek `Authorization` z kopiowanej konfiguracji. To osobny token dostępu
 do lokalnej aplikacji, a nie klucz Apple. Nie dodawaj klucza `.p8` do konfiguracji,
 repozytorium ani rozmowy z agentem.
 
-Interfejs aplikacji jest obecnie po polsku; opisy narzędzi MCP są po angielsku.
+Interfejs aplikacji jest obecnie po angielsku. Tłumaczenia interfejsu korzystają
+z katalogów String Catalog Apple; instrukcja dodawania języków jest w
+[przewodniku tłumaczeń](docs/localization.md). Nazwy narzędzi i pola protokołu MCP
+pozostają po angielsku.
 
 Aplikacja musi działać podczas korzystania z MCP. Zamknięcie okna pozostawia
 ją uruchomioną; **⌘Q** zatrzymuje serwer. Pierwsza wersja obsługuje jeden klucz zespołu.
@@ -86,7 +90,7 @@ istniejącą odpowiedź; jego publikacja w App Store może się opóźnić.
 
 ## Historia
 
-Zakładka **Historia MCP** pokazuje metodę, narzędzie, parametry, czas, wynik i błędy.
+Zakładka **MCP History** pokazuje metodę, narzędzie, parametry, czas, wynik i błędy.
 Zapis obejmuje również inicjalizację, listowanie narzędzi, powiadomienia oraz
 odrzucone próby. Historia przetrwa restart aplikacji:
 

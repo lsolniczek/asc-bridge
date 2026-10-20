@@ -1,0 +1,732 @@
+{
+  "sourceLanguage": "en",
+  "strings": {
+    "ASC Bridge": {
+      "comment": "Application name shown in the sidebar.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ASC Bridge"
+          }
+        }
+      }
+    },
+    "About ASC Bridge": {
+      "comment": "About menu item that opens the macOS About panel.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "About ASC Bridge"
+          }
+        }
+      }
+    },
+    "Apple ↔ your agent": {
+      "comment": "Sidebar subtitle describing the connection between Apple and the user's agent.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Apple ↔ your agent"
+          }
+        }
+      }
+    },
+    "Connection": {
+      "comment": "Sidebar item for setting up the App Store Connect connection.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Connection"
+          }
+        }
+      }
+    },
+    "MCP History": {
+      "comment": "Title of the MCP request history page.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "MCP History"
+          }
+        }
+      }
+    },
+    "Running on this Mac": {
+      "comment": "Sidebar footer explaining that the MCP server runs on this Mac.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Running on this Mac"
+          }
+        }
+      }
+    },
+    "App Store Connect for your agent": {
+      "comment": "Main onboarding heading.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "App Store Connect for your agent"
+          }
+        }
+      }
+    },
+    "Give your agent access to app metadata, builds, TestFlight, and reviews.": {
+      "comment": "Onboarding summary of the App Store Connect areas the agent can access.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Give your agent access to app metadata, builds, TestFlight, and reviews."
+          }
+        }
+      }
+    },
+    "Apple Key": {
+      "comment": "Status card title for the App Store Connect API key.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Apple Key"
+          }
+        }
+      }
+    },
+    "Saved in Keychain": {
+      "comment": "Status shown when credentials are saved.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Saved in Keychain"
+          }
+        }
+      }
+    },
+    "Waiting for a key": {
+      "comment": "Status shown when credentials have not been added.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Waiting for a key"
+          }
+        }
+      }
+    },
+    "MCP Connection": {
+      "comment": "Status card title for the local MCP server.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "MCP Connection"
+          }
+        }
+      }
+    },
+    "App Store Connect team key": {
+      "comment": "Group heading for App Store Connect API key credentials.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "App Store Connect team key"
+          }
+        }
+      }
+    },
+    "Key ID": {
+      "comment": "Label for the App Store Connect API key identifier.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Key ID"
+          }
+        }
+      }
+    },
+    "Issuer ID": {
+      "comment": "Label for the App Store Connect API issuer identifier.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Issuer ID"
+          }
+        }
+      }
+    },
+    "Issuer ID from App Store Connect": {
+      "comment": "Placeholder describing where to find the issuer ID.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Issuer ID from App Store Connect"
+          }
+        }
+      }
+    },
+    "Private Key (.p8)": {
+      "comment": "Label for the private key file.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Private Key (.p8)"
+          }
+        }
+      }
+    },
+    "Choose File…": {
+      "comment": "Button that opens the private key file picker.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Choose File…"
+          }
+        }
+      }
+    },
+    "Key is already saved": {
+      "comment": "Shown when a key is saved and no new key file is selected.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Key is already saved"
+          }
+        }
+      }
+    },
+    "No file selected": {
+      "comment": "Shown before a key file is selected.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No file selected"
+          }
+        }
+      }
+    },
+    "Save to Keychain": {
+      "comment": "Button that securely saves the API key to macOS Keychain.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Save to Keychain"
+          }
+        }
+      }
+    },
+    "Test saved key": {
+      "comment": "Button that tests the saved App Store Connect API key.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Test saved key"
+          }
+        }
+      }
+    },
+    "Delete Key": {
+      "comment": "Button that deletes the saved key from Keychain.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Delete Key"
+          }
+        }
+      }
+    },
+    "Your private key and Apple tokens stay in this app. They are never shared with your agent.": {
+      "comment": "Security explanation for credential handling.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your private key and Apple tokens stay in this app. They are never shared with your agent."
+          }
+        }
+      }
+    },
+    "Connect your agent with MCP": {
+      "comment": "Group heading for MCP client connection details.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Connect your agent with MCP"
+          }
+        }
+      }
+    },
+    "Copy this configuration to ~/.codex/config.toml. It contains a separate MCP token; the Apple key stays in Keychain. For another MCP client, use the same URL and Authorization header.": {
+      "comment": "Instructions for connecting Codex or another MCP client. Preserve the configuration path, URL, header name, and technical terms.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Copy this configuration to ~/.codex/config.toml. It contains a separate MCP token; the Apple key stays in Keychain. For another MCP client, use the same URL and Authorization header."
+          }
+        }
+      }
+    },
+    "Copy Codex configuration": {
+      "comment": "Button that copies Codex MCP connection configuration.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Copy Codex configuration"
+          }
+        }
+      }
+    },
+    "Your agent can manage app metadata, versions, localizations, builds, and TestFlight testing details, and read reviews or post public replies. Changes take effect immediately, with no in-app confirmation. Review replies are visible to customers. Every MCP request appears in History.": {
+      "comment": "Explains available agent operations, immediate mutations, public review replies, and MCP request logging.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your agent can manage app metadata, versions, localizations, builds, and TestFlight testing details, and read reviews or post public replies. Changes take effect immediately, with no in-app confirmation. Review replies are visible to customers. Every MCP request appears in History."
+          }
+        }
+      }
+    },
+    "Showing the last 500 calls. Full history is saved on this Mac.": {
+      "comment": "Description of the local MCP request history retention.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Showing the last 500 calls. Full history is saved on this Mac."
+          }
+        }
+      }
+    },
+    "Show history file in Finder": {
+      "comment": "Tooltip for revealing the local history file in Finder.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Show history file in Finder"
+          }
+        }
+      }
+    },
+    "Refresh history": {
+      "comment": "Tooltip for refreshing MCP request history.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Refresh history"
+          }
+        }
+      }
+    },
+    "Search tools, methods, or results": {
+      "comment": "Search field label and placeholder for MCP request history.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Search tools, methods, or results"
+          }
+        }
+      }
+    },
+    "No history yet": {
+      "comment": "Empty-state title shown before any MCP requests are recorded.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No history yet"
+          }
+        }
+      }
+    },
+    "Connect an agent to see tool calls, errors, and other MCP requests here.": {
+      "comment": "Empty-state description for MCP request history.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Connect an agent to see tool calls, errors, and other MCP requests here."
+          }
+        }
+      }
+    },
+    "Select a request": {
+      "comment": "Empty-state title shown until a history entry is selected.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Select a request"
+          }
+        }
+      }
+    },
+    "View its parameters, duration, and result.": {
+      "comment": "Empty-state description for an unselected history entry.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "View its parameters, duration, and result."
+          }
+        }
+      }
+    },
+    "%lld ms": {
+      "comment": "Elapsed time in milliseconds, shown in a history row or request details.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld ms"
+          }
+        }
+      }
+    },
+    "Time": {
+      "comment": "Label for the time a request started.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Time"
+          }
+        }
+      }
+    },
+    "Method": {
+      "comment": "Label for the raw MCP method name. The method name itself is not translated.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Method"
+          }
+        }
+      }
+    },
+    "Request ID": {
+      "comment": "Label for an MCP request identifier.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Request ID"
+          }
+        }
+      }
+    },
+    "Duration": {
+      "comment": "Label for elapsed request time.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Duration"
+          }
+        }
+      }
+    },
+    "No completion was recorded. The request may still be running or may have been interrupted. Check its status in App Store Connect before repeating a change.": {
+      "comment": "Warning shown when an MCP request has no recorded completion.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No completion was recorded. The request may still be running or may have been interrupted. Check its status in App Store Connect before repeating a change."
+          }
+        }
+      }
+    },
+    "Result": {
+      "comment": "Heading for a request's recorded result.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Result"
+          }
+        }
+      }
+    },
+    "Parameters": {
+      "comment": "Heading for a request's recorded parameters.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Parameters"
+          }
+        }
+      }
+    },
+    "No parameters": {
+      "comment": "Shown when a history request has no recorded parameters.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No parameters"
+          }
+        }
+      }
+    },
+    "Completed": {
+      "comment": "MCP request status label.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Completed"
+          }
+        }
+      }
+    },
+    "Error": {
+      "comment": "MCP request status label.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Error"
+          }
+        }
+      }
+    },
+    "Rejected": {
+      "comment": "MCP request status label.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rejected"
+          }
+        }
+      }
+    },
+    "Pending or incomplete": {
+      "comment": "MCP request status label for a request without a recorded completion.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pending or incomplete"
+          }
+        }
+      }
+    },
+    "Starting": {
+      "comment": "Local MCP server status.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Starting"
+          }
+        }
+      }
+    },
+    "MCP running locally": {
+      "comment": "Local MCP server status.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "MCP running locally"
+          }
+        }
+      }
+    },
+    "MCP unavailable": {
+      "comment": "Local MCP server status.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "MCP unavailable"
+          }
+        }
+      }
+    },
+    "The MCP server stopped. Restart the app.": {
+      "comment": "Error shown if the local MCP server stops unexpectedly.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The MCP server stopped. Restart the app."
+          }
+        }
+      }
+    },
+    "Could not start MCP. Check whether another copy of the app is using port 43129, then restart the app.": {
+      "comment": "Error shown when the local MCP server cannot start.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Could not start MCP. Check whether another copy of the app is using port 43129, then restart the app."
+          }
+        }
+      }
+    },
+    "Could not prepare MCP history or the connection token. %@": {
+      "comment": "Error shown when startup cannot prepare local MCP history or a token. %@ is the underlying safe error.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Could not prepare MCP history or the connection token. %@"
+          }
+        }
+      }
+    },
+    "Choose an App Store Connect team key (.p8)": {
+      "comment": "Title of the key-file picker.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Choose an App Store Connect team key (.p8)"
+          }
+        }
+      }
+    },
+    "Choose Key": {
+      "comment": "Action button in the key-file picker.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Choose Key"
+          }
+        }
+      }
+    },
+    "Choose a valid .p8 private key downloaded from App Store Connect.": {
+      "comment": "Validation error shown when the selected file is not a valid App Store Connect private key.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Choose a valid .p8 private key downloaded from App Store Connect."
+          }
+        }
+      }
+    },
+    "File selected. Enter the IDs and save the key to Keychain.": {
+      "comment": "Notice shown after the user selects a key file.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "File selected. Enter the IDs and save the key to Keychain."
+          }
+        }
+      }
+    },
+    "Could not read the .p8 key. Check the file and its permissions.": {
+      "comment": "Error shown when the selected key file cannot be read.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Could not read the .p8 key. Check the file and its permissions."
+          }
+        }
+      }
+    },
+    "Choose a .p8 file first.": {
+      "comment": "Error shown when saving before selecting a key file.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Choose a .p8 file first."
+          }
+        }
+      }
+    },
+    "Key saved to Keychain. You can test the connection to Apple.": {
+      "comment": "Notice shown after credentials are saved.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Key saved to Keychain. You can test the connection to Apple."
+          }
+        }
+      }
+    },
+    "Key deleted from Keychain. MCP tools no longer have access to App Store Connect.": {
+      "comment": "Notice shown after credentials are deleted.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Key deleted from Keychain. MCP tools no longer have access to App Store Connect."
+          }
+        }
+      }
+    },
+    "App Store Connect connection is working. The saved key is valid.": {
+      "comment": "Notice shown after a successful connection test.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "App Store Connect connection is working. The saved key is valid."
+          }
+        }
+      }
+    },
+    "Configuration copied. Add it to ~/.codex/config.toml.": {
+      "comment": "Notice shown after copying Codex MCP configuration. Preserve the configuration path.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Configuration copied. Add it to ~/.codex/config.toml."
+          }
+        }
+      }
+    },
+    "Could not read MCP history.": {
+      "comment": "Error shown when local MCP history cannot be read.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Could not read MCP history."
+          }
+        }
+      }
+    }
+  },
+  "version": "1.0"
+}

@@ -9,9 +9,9 @@ final class AppModel: ObservableObject {
         case starting, running, failed
         var label: String {
             switch self {
-            case .starting: "Uruchamianie"
-            case .running: "MCP działa lokalnie"
-            case .failed: "MCP niedostępne"
+            case .starting: String(localized: "Starting", bundle: .module, comment: "Local MCP server status.")
+            case .running: String(localized: "MCP running locally", bundle: .module, comment: "Local MCP server status.")
+            case .failed: String(localized: "MCP unavailable", bundle: .module, comment: "Local MCP server status.")
             }
         }
     }
@@ -63,17 +63,17 @@ final class AppModel: ObservableObject {
                         await self.serverDidStart()
                     }
                     self.serverState = .failed
-                    self.serverError = "Serwer MCP został zatrzymany. Uruchom aplikację ponownie."
+                    self.serverError = String(localized: "The MCP server stopped. Restart the app.", bundle: .module, comment: "Error shown if the local MCP server stops unexpectedly.")
                 } catch is CancellationError {
                     // Normal process shutdown.
                 } catch {
                     self.serverState = .failed
-                    self.serverError = "Nie można uruchomić MCP. Sprawdź, czy inna kopia aplikacji nie używa portu 43129, i uruchom aplikację ponownie."
+                    self.serverError = String(localized: "Could not start MCP. Check whether another copy of the app is using port 43129, then restart the app.", bundle: .module, comment: "Error shown when the local MCP server cannot start.")
                 }
             }
         } catch {
             serverState = .failed
-            serverError = "Nie można przygotować historii lub tokenu połączenia MCP. \(error.localizedDescription)"
+            serverError = String(localized: "Could not prepare MCP history or the connection token. \(error.localizedDescription)", bundle: .module, comment: "Error shown when startup cannot prepare the local MCP history or token. The underlying safe error is included.")
         }
         do {
             if let stored = try await credentials.load() {
@@ -89,8 +89,8 @@ final class AppModel: ObservableObject {
 
     func importKey() {
         let panel = NSOpenPanel()
-        panel.title = "Wybierz klucz zespołu App Store Connect (.p8)"
-        panel.prompt = "Wybierz klucz"
+        panel.title = String(localized: "Choose an App Store Connect team key (.p8)", bundle: .module, comment: "Title of the key-file picker.")
+        panel.prompt = String(localized: "Choose Key", bundle: .module, comment: "Action button in the key-file picker.")
         panel.allowsMultipleSelection = false
         panel.canChooseDirectories = false
         guard panel.runModal() == .OK, let url = panel.url else { return }
@@ -102,19 +102,19 @@ final class AppModel: ObservableObject {
             let bytes = try file.read(upToCount: 65_537) ?? Data()
             guard bytes.count <= 65_536, let pem = String(data: bytes, encoding: .utf8),
                   pem.contains("-----BEGIN PRIVATE KEY-----") else {
-                throw BridgeError.invalidInput("Wybierz poprawny klucz prywatny .p8 pobrany z App Store Connect.")
+                throw BridgeError.invalidInput(String(localized: "Choose a valid .p8 private key downloaded from App Store Connect.", bundle: .module, comment: "Validation error shown when the selected file is not a valid App Store Connect private key."))
             }
             importedPEM = pem
             importedFileName = url.lastPathComponent
-            showNotice("Plik wybrany. Uzupełnij identyfikatory i zapisz klucz w Keychain.")
+            showNotice(String(localized: "File selected. Enter the IDs and save the key to Keychain.", bundle: .module, comment: "Notice shown after the user selects a key file."))
         } catch {
-            showNotice("Nie można wczytać klucza .p8. Sprawdź plik i jego uprawnienia.", isError: true)
+            showNotice(String(localized: "Could not read the .p8 key. Check the file and its permissions.", bundle: .module, comment: "Error shown when the selected key file cannot be read."), isError: true)
         }
     }
 
     func saveCredentials() async {
         guard let pem = importedPEM else {
-            showNotice("Najpierw wybierz plik .p8.", isError: true)
+            showNotice(String(localized: "Choose a .p8 file first.", bundle: .module, comment: "Error shown when saving before selecting a key file."), isError: true)
             return
         }
         isBusy = true
@@ -132,7 +132,7 @@ final class AppModel: ObservableObject {
             hasCredentials = true
             importedPEM = nil
             importedFileName = nil
-            showNotice("Klucz zapisany w Keychain. Możesz przetestować połączenie z Apple.")
+            showNotice(String(localized: "Key saved to Keychain. You can test the connection to Apple.", bundle: .module, comment: "Notice shown after credentials are saved."))
         } catch {
             showNotice(error.localizedDescription, isError: true)
         }
@@ -148,7 +148,7 @@ final class AppModel: ObservableObject {
             importedPEM = nil
             importedFileName = nil
             hasCredentials = false
-            showNotice("Klucz usunięty z Keychain. Narzędzia MCP nie mają już dostępu do ASC.")
+            showNotice(String(localized: "Key deleted from Keychain. MCP tools no longer have access to App Store Connect.", bundle: .module, comment: "Notice shown after credentials are deleted."))
         } catch {
             showNotice(error.localizedDescription, isError: true)
         }
@@ -159,7 +159,7 @@ final class AppModel: ObservableObject {
         defer { isBusy = false }
         do {
             _ = try await client.call(.listApps, arguments: ["limit": .number(1)])
-            showNotice("Połączenie z App Store Connect działa. Zapisany klucz jest poprawny.")
+            showNotice(String(localized: "App Store Connect connection is working. The saved key is valid.", bundle: .module, comment: "Notice shown after a successful connection test."))
         } catch {
             showNotice(error.localizedDescription, isError: true)
         }
@@ -174,7 +174,7 @@ final class AppModel: ObservableObject {
         """
         NSPasteboard.general.clearContents()
         NSPasteboard.general.setString(configuration, forType: .string)
-        showNotice("Konfiguracja skopiowana. Dodaj ją do pliku ~/.codex/config.toml.")
+        showNotice(String(localized: "Configuration copied. Add it to ~/.codex/config.toml.", bundle: .module, comment: "Notice shown after copying the Codex MCP configuration."))
     }
 
     func refreshHistory() async {
@@ -183,7 +183,7 @@ final class AppModel: ObservableObject {
             entries = try await audit.recentEntries(limit: 500)
             historyError = nil
         } catch {
-            historyError = "Nie można odczytać historii MCP."
+            historyError = String(localized: "Could not read MCP history.", bundle: .module, comment: "Error shown when the local MCP history cannot be read.")
         }
     }
 

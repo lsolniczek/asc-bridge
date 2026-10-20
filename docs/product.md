@@ -5,6 +5,12 @@ and enters Key ID and Issuer ID in a native UI. A connection test lists one app.
 The app exposes local MCP and displays connection settings and persistent history.
 Closing the window keeps the app available; quitting the app stops MCP.
 
+The native interface and app-owned user messages use English as their source and
+default language, stored in Apple's String Catalogs. The UI is prepared for future
+translations. MCP tool names, protocol fields, API values and App Store metadata
+remain protocol or user content and are not translated. See
+[the localization guide](localization.md).
+
 ## Tools
 - `asc_list_apps`: discover app IDs.
 - `asc_list_versions`: list versions for an app, optionally filter by platform.

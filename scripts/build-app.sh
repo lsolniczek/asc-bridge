@@ -10,27 +10,32 @@ elif [[ $# -ne 0 ]]; then
     exit 2
 fi
 
-swift build --package-path "$project_dir" -c "$configuration" --product ASCBridge
+swift build --package-path "$project_dir" --build-system swiftbuild -c "$configuration" --product ASCBridge
 if [[ ! -s "$project_dir/LICENSE" ]]; then
     echo "Missing project LICENSE; refusing to package the app without license notices." >&2
     exit 1
 fi
 python3 "$project_dir/scripts/update-third-party-notices.py" --check
-binary_dir="$(swift build --package-path "$project_dir" -c "$configuration" --show-bin-path)"
+binary_dir="$(swift build --package-path "$project_dir" --build-system swiftbuild -c "$configuration" --show-bin-path)"
 app_path="$project_dir/dist/ASC Bridge.app"
 mkdir -p "$app_path/Contents/MacOS" "$app_path/Contents/Resources"
 cp "$binary_dir/ASCBridge" "$app_path/Contents/MacOS/ASCBridge"
 cp "$project_dir/Resources/Info.plist" "$app_path/Contents/Info.plist"
 for resource_bundle in "$binary_dir"/*.bundle; do
     if [[ -d "$resource_bundle" ]]; then
-        cp -Rf "$resource_bundle" "$app_path/Contents/Resources/"
+        # A removed language must not survive from a previous app build.
+        destination="$app_path/Contents/Resources/$(basename "$resource_bundle")"
+        rm -rf -- "$destination"
+        cp -R "$resource_bundle" "$app_path/Contents/Resources/"
     fi
 done
+python3 "$project_dir/scripts/localizations.py" configure-app --app "$app_path"
+python3 "$project_dir/scripts/localizations.py" check-app --app "$app_path"
 cp -f "$project_dir/LICENSE" "$app_path/Contents/Resources/LICENSE"
 cp -f "$project_dir/THIRD_PARTY_NOTICES.md" "$app_path/Contents/Resources/THIRD_PARTY_NOTICES.md"
 swift "$project_dir/scripts/make-icon.swift" "$project_dir/dist/AppIcon.iconset"
 iconutil -c icns "$project_dir/dist/AppIcon.iconset" -o "$app_path/Contents/Resources/AppIcon.icns"
 codesign --force --sign "${ASC_BRIDGE_SIGN_IDENTITY:--}" --options runtime "$app_path"
 codesign --verify --strict "$app_path"
-echo "Gotowe: $app_path"
+echo "Ready: $app_path"
 

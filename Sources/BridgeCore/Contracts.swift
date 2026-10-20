@@ -117,11 +117,15 @@ public enum BridgeError: Error, LocalizedError, Sendable {
     public var errorDescription: String? {
         switch self {
         case .invalidInput(let message): message
-        case .credentialsMissing: "Najpierw dodaj klucz App Store Connect w aplikacji ASC Bridge."
-        case .keychain(let status): "Nie udało się uzyskać dostępu do Keychain (\(status))."
-        case .apple(let status, let message): "App Store Connect (HTTP \(status)): \(message)"
+        case .credentialsMissing:
+            String(localized: "Add your App Store Connect API key in ASC Bridge first.", bundle: .module, comment: "Shown when a request needs App Store Connect credentials that have not been added yet.")
+        case .keychain(let status):
+            String(localized: "Keychain access failed (\(status, format: .number.grouping(.never))).", bundle: .module, comment: "Shown when macOS Keychain access fails. Keep the interpolated OSStatus code unchanged and ungrouped.")
+        case .apple(let status, let message):
+            String(localized: "App Store Connect (HTTP \(status, format: .number.grouping(.never))): \(message)", bundle: .module, comment: "Prefix for an App Store Connect HTTP error. Keep the HTTP status ungrouped and the supplied Apple error text unchanged.")
         case .transport(let message): message
-        case .auditUnavailable: "Nie można zapisać historii MCP. Operacja nie została rozpoczęta."
+        case .auditUnavailable:
+            String(localized: "The MCP request could not be recorded. The operation was not started.", bundle: .module, comment: "Shown when audit history cannot be saved before an MCP operation begins.")
         }
     }
 }

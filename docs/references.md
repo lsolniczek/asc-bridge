@@ -1,5 +1,10 @@
 # Primary references
 
+- [Localizing and varying text with String Catalogs](https://developer.apple.com/documentation/xcode/localizing-and-varying-text-with-a-string-catalog)
+- [Localizing package resources](https://developer.apple.com/documentation/xcode/localizing-package-resources)
+- [Bundling resources with a Swift package](https://developer.apple.com/documentation/xcode/bundling-resources-with-a-swift-package)
+- [CFBundleLocalizations](https://developer.apple.com/documentation/bundleresources/information-property-list/cfbundlelocalizations)
+- [Swift Package Manager documentation](https://github.com/swiftlang/swift-package-manager/blob/main/Sources/PackageManagerDocs/Documentation.docc/Documentation.md)
 - https://openai.com/index/harness-engineering/ — short agent map, repository docs,
   explicit architecture and automated checks, scaled to a small app.
 - https://developer.apple.com/documentation/appstoreconnectapi/generating-tokens-for-api-requests

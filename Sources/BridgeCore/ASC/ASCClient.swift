@@ -24,16 +24,16 @@ public actor ASCClient: ASCServing {
 
     public static func validate(_ credentials: TeamCredentials) throws {
         guard credentials.keyID.range(of: "^[A-Za-z0-9]{10}$", options: .regularExpression) != nil else {
-            throw BridgeError.invalidInput("Key ID musi zawierać 10 znaków alfanumerycznych.")
+            throw BridgeError.invalidInput(String(localized: "Key ID must contain 10 alphanumeric characters.", bundle: .module, comment: "Credential validation error shown when an App Store Connect key ID has the wrong format."))
         }
         guard UUID(uuidString: credentials.issuerID) != nil,
               credentials.issuerID.range(of: "^[0-9A-Fa-f]{8}(-[0-9A-Fa-f]{4}){3}-[0-9A-Fa-f]{12}$", options: .regularExpression) != nil else {
-            throw BridgeError.invalidInput("Issuer ID musi być poprawnym identyfikatorem UUID.")
+            throw BridgeError.invalidInput(String(localized: "Issuer ID must be a valid UUID.", bundle: .module, comment: "Credential validation error shown when the App Store Connect issuer ID is not a UUID."))
         }
         do {
             _ = try P256.Signing.PrivateKey(pemRepresentation: credentials.privateKeyPEM)
         } catch {
-            throw BridgeError.invalidInput("Plik klucza musi zawierać prawidłowy prywatny klucz P-256 w formacie PEM.")
+            throw BridgeError.invalidInput(String(localized: "The key file must contain a valid P-256 private key in PEM format.", bundle: .module, comment: "Credential validation error shown when the imported key is not a valid P-256 PEM private key."))
         }
     }
 
@@ -60,7 +60,7 @@ public actor ASCClient: ASCServing {
         }
 
         if (300..<400).contains(response.statusCode) {
-            throw BridgeError.transport("App Store Connect redirected the request. Redirects are blocked for security.")
+            throw BridgeError.transport(String(localized: "App Store Connect redirected the request. Redirects are blocked for security.", bundle: .module, comment: "Shown when App Store Connect responds with a redirect, which the client blocks for security."))
         }
         guard (200..<300).contains(response.statusCode) else {
             throw BridgeError.apple(status: response.statusCode, message: Self.appleErrorMessage(response.data))
@@ -74,13 +74,13 @@ public actor ASCClient: ASCServing {
         do {
             decoded = try JSONDecoder().decode(JSONValue.self, from: response.data)
         } catch {
-            throw BridgeError.transport("App Store Connect returned an unreadable response.")
+            throw BridgeError.transport(String(localized: "App Store Connect returned an unreadable response.", bundle: .module, comment: "Shown when a successful App Store Connect response is not valid JSON."))
         }
         guard case .object(let object) = decoded, let data = object["data"] else {
-            throw BridgeError.transport("App Store Connect returned a response without resource data.")
+            throw BridgeError.transport(String(localized: "App Store Connect returned a response without resource data.", bundle: .module, comment: "Shown when an App Store Connect response does not contain its required data field."))
         }
         if data == .null, !plan.nullDataAllowed {
-            throw BridgeError.transport("App Store Connect returned a response without resource data.")
+            throw BridgeError.transport(String(localized: "App Store Connect returned a response without resource data.", bundle: .module, comment: "Shown when an App Store Connect response does not contain its required data field."))
         }
 
         return .object([
@@ -94,7 +94,7 @@ public actor ASCClient: ASCServing {
         do {
             key = try P256.Signing.PrivateKey(pemRepresentation: credentials.privateKeyPEM)
         } catch {
-            throw BridgeError.invalidInput("The saved App Store Connect private key is invalid.")
+            throw BridgeError.invalidInput(String(localized: "The saved App Store Connect private key is invalid.", bundle: .module, comment: "Shown when a previously saved App Store Connect private key can no longer be parsed."))
         }
         let issuedAt = Int64(now.timeIntervalSince1970.rounded(.down))
         let header = JWTHeader(alg: "ES256", kid: credentials.keyID, typ: "JWT")
@@ -105,7 +105,7 @@ public actor ASCClient: ASCServing {
             // CryptoKit's P256 ECDSA raw representation is the ES256 R || S form.
             return "\(unsigned).\(signature.rawRepresentation.base64URLString)"
         } catch {
-            throw BridgeError.transport("The App Store Connect request could not be signed.")
+            throw BridgeError.transport(String(localized: "The App Store Connect request could not be signed.", bundle: .module, comment: "Shown when the client cannot sign an App Store Connect request."))
         }
     }
 
@@ -113,7 +113,7 @@ public actor ASCClient: ASCServing {
 
     private static func url(path: String, query: [(String, String)]) throws -> URL {
         guard var components = URLComponents(string: "https://api.appstoreconnect.apple.com\(path)") else {
-            throw BridgeError.transport("The App Store Connect request URL could not be created.")
+            throw BridgeError.transport(String(localized: "The App Store Connect request URL could not be created.", bundle: .module, comment: "Shown when the client cannot construct the fixed App Store Connect API URL."))
         }
         if !query.isEmpty {
             components.queryItems = query.map { URLQueryItem(name: $0.0, value: $0.1) }
@@ -122,7 +122,7 @@ public actor ASCClient: ASCServing {
               url.scheme == "https",
               url.host == "api.appstoreconnect.apple.com",
               url.user == nil, url.password == nil else {
-            throw BridgeError.transport("The App Store Connect request URL is invalid.")
+            throw BridgeError.transport(String(localized: "The App Store Connect request URL is invalid.", bundle: .module, comment: "Shown when the constructed App Store Connect API URL fails security validation."))
         }
         return url
     }
@@ -171,7 +171,7 @@ public actor ASCClient: ASCServing {
             errors = []
         }
         guard let first = errors.first?.objectValue else {
-            return "Apple could not process the request."
+            return String(localized: "Apple could not process the request.", bundle: .module, comment: "Fallback shown when an unsuccessful Apple response does not contain a usable error message.")
         }
         let code = first["code"]?.stringValue.map { sanitized($0, limit: 80) }
         let title = first["title"]?.stringValue.map { sanitized($0, limit: 180) }
@@ -179,8 +179,12 @@ public actor ASCClient: ASCServing {
         var pieces: [String] = []
         if let title, !title.isEmpty { pieces.append(title) }
         if let detail, !detail.isEmpty, detail != title { pieces.append(detail) }
-        if pieces.isEmpty, let code, !code.isEmpty { pieces.append("Apple error code \(code)") }
-        if pieces.isEmpty { return "Apple could not process the request." }
+        if pieces.isEmpty, let code, !code.isEmpty {
+            pieces.append(String(localized: "Apple error code \(code)", bundle: .module, comment: "Label for an Apple API error code. Keep the interpolated code unchanged."))
+        }
+        if pieces.isEmpty {
+            return String(localized: "Apple could not process the request.", bundle: .module, comment: "Fallback shown when an unsuccessful Apple response does not contain a usable error message.")
+        }
         return String(pieces.joined(separator: ": ").prefix(500))
     }
 
@@ -271,7 +275,7 @@ private struct RequestPlan {
             guard !version.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty,
                   version.count <= 18,
                   !version.unicodeScalars.contains(where: CharacterSet.controlCharacters.contains) else {
-                throw BridgeError.invalidInput("versionString must be 1 to 18 visible characters.")
+                throw BridgeError.invalidInput(String(localized: "versionString must be 1 to 18 visible characters.", bundle: .module, comment: "Input validation error for an App Store version string. Keep the JSON field name unchanged."))
             }
             let body: JSONValue = .object(["data": .object([
                 "type": .string("appStoreVersions"),
@@ -305,7 +309,7 @@ private struct RequestPlan {
             let localizationID = try identifier(arguments, "localizationId")
             let attributes = try localizationAttributes(arguments, includeLocale: nil)
             guard !attributes.isEmpty else {
-                throw BridgeError.invalidInput("Provide at least one localization metadata field.")
+                throw BridgeError.invalidInput(String(localized: "Provide at least one localization metadata field.", bundle: .module, comment: "Input validation error shown when an update includes no App Store version localization fields."))
             }
             let body: JSONValue = .object(["data": .object([
                 "type": .string("appStoreVersionLocalizations"),
@@ -364,7 +368,7 @@ private struct RequestPlan {
             try addURLAttribute("privacyChoicesUrl", from: arguments, to: &attributes)
             try addTextAttribute("privacyPolicyText", from: arguments, to: &attributes, maximum: 4_000)
             guard !attributes.isEmpty else {
-                throw BridgeError.invalidInput("Provide at least one app info localization metadata field.")
+                throw BridgeError.invalidInput(String(localized: "Provide at least one app info localization metadata field.", bundle: .module, comment: "Input validation error shown when an update includes no app information localization fields."))
             }
             let body: JSONValue = .object(["data": .object([
                 "type": .string("appInfoLocalizations"),
@@ -390,7 +394,7 @@ private struct RequestPlan {
             if let processingState = try optionalString(arguments, "processingState") {
                 let allowed = ["PROCESSING", "FAILED", "INVALID", "VALID"]
                 guard allowed.contains(processingState) else {
-                    throw BridgeError.invalidInput("processingState must be PROCESSING, FAILED, INVALID, or VALID.")
+                    throw BridgeError.invalidInput(String(localized: "processingState must be PROCESSING, FAILED, INVALID, or VALID.", bundle: .module, comment: "Input validation error for the processingState filter. Keep the JSON field name and allowed API values unchanged."))
                 }
                 query.append(("filter[processingState]", processingState))
             }
@@ -464,13 +468,13 @@ private struct RequestPlan {
             var query = try pagination(arguments)
             if let territory = try optionalString(arguments, "territory") {
                 guard territory.range(of: "^[A-Z]{3}$", options: .regularExpression) != nil else {
-                    throw BridgeError.invalidInput("territory must be a three-letter uppercase country code.")
+                    throw BridgeError.invalidInput(String(localized: "territory must be a three-letter uppercase country code.", bundle: .module, comment: "Input validation error for the territory filter. Keep the JSON field name unchanged."))
                 }
                 query.append(("filter[territory]", territory))
             }
             if let rating = arguments["rating"] {
                 guard let integer = rating.intValue, (1...5).contains(integer) else {
-                    throw BridgeError.invalidInput("rating must be an integer from 1 to 5.")
+                    throw BridgeError.invalidInput(String(localized: "rating must be an integer from 1 to 5.", bundle: .module, comment: "Input validation error for a customer review rating filter. Keep the JSON field name unchanged."))
                 }
                 query.append(("filter[rating]", String(integer)))
             }
@@ -491,7 +495,7 @@ private struct RequestPlan {
             let reviewID = try identifier(arguments, "reviewId")
             let responseBody = try boundedText(requiredString(arguments, "responseBody"), field: "responseBody", maximum: 5_970)
             guard !responseBody.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
-                throw BridgeError.invalidInput("responseBody must not be empty or whitespace only.")
+                throw BridgeError.invalidInput(String(localized: "responseBody must not be empty or whitespace only.", bundle: .module, comment: "Input validation error for a public App Store customer review response. Keep the JSON field name unchanged."))
             }
             let body = relatedCreateBody(
                 type: "customerReviewResponses",
@@ -504,7 +508,7 @@ private struct RequestPlan {
 
     private static func allow(_ arguments: [String: JSONValue], keys: Set<String>) throws {
         if arguments.keys.contains(where: { !keys.contains($0) }) {
-            throw BridgeError.invalidInput("The request contains an unknown argument.")
+            throw BridgeError.invalidInput(String(localized: "The request contains an unknown argument.", bundle: .module, comment: "Input validation error shown when a typed operation receives an unsupported JSON argument."))
         }
     }
 
@@ -526,21 +530,23 @@ private struct RequestPlan {
 
     private static func requiredString(_ arguments: [String: JSONValue], _ key: String) throws -> String {
         guard let value = arguments[key]?.stringValue else {
-            throw BridgeError.invalidInput("\(key) must be a string.")
+            throw BridgeError.invalidInput(String(localized: "\(key) must be a string.", bundle: .module, comment: "Input validation error for an argument's type. The interpolated value is a JSON argument name and must remain unchanged."))
         }
         return value
     }
 
     private static func optionalString(_ arguments: [String: JSONValue], _ key: String) throws -> String? {
         guard let value = arguments[key] else { return nil }
-        guard let string = value.stringValue else { throw BridgeError.invalidInput("\(key) must be a string.") }
+        guard let string = value.stringValue else {
+            throw BridgeError.invalidInput(String(localized: "\(key) must be a string.", bundle: .module, comment: "Input validation error for an argument's type. The interpolated value is a JSON argument name and must remain unchanged."))
+        }
         return string
     }
 
     private static func identifier(_ arguments: [String: JSONValue], _ key: String) throws -> String {
         let value = try requiredString(arguments, key)
         guard value.range(of: "^[A-Za-z0-9_-]{1,128}$", options: .regularExpression) != nil else {
-            throw BridgeError.invalidInput("\(key) must be a safe App Store Connect resource ID.")
+            throw BridgeError.invalidInput(String(localized: "\(key) must be a safe App Store Connect resource ID.", bundle: .module, comment: "Input validation error for an App Store Connect resource ID. The interpolated value is a JSON argument name and must remain unchanged."))
         }
         return value
     }
@@ -549,14 +555,16 @@ private struct RequestPlan {
         var query: [(String, String)] = []
         if let value = arguments["limit"] {
             guard let limit = value.intValue, (1...200).contains(limit) else {
-                throw BridgeError.invalidInput("limit must be an integer from 1 to 200.")
+                throw BridgeError.invalidInput(String(localized: "limit must be an integer from 1 to 200.", bundle: .module, comment: "Input validation error for the pagination limit. Keep the JSON field name unchanged."))
             }
             query.append(("limit", String(limit)))
         } else {
             query.append(("limit", "50"))
         }
         if let cursor = try optionalString(arguments, "cursor") {
-            guard isSafeCursor(cursor) else { throw BridgeError.invalidInput("cursor must be at most 2048 characters and contain no control characters.") }
+            guard isSafeCursor(cursor) else {
+                throw BridgeError.invalidInput(String(localized: "cursor must be at most 2048 characters and contain no control characters.", bundle: .module, comment: "Input validation error for the pagination cursor. Keep the JSON field name and limit unchanged."))
+            }
             query.append(("cursor", cursor))
         }
         return query
@@ -569,7 +577,7 @@ private struct RequestPlan {
     private static func platformValue(_ value: String) throws -> String {
         let allowed = ["IOS", "MAC_OS", "TV_OS", "VISION_OS"]
         guard allowed.contains(value) else {
-            throw BridgeError.invalidInput("platform must be IOS, MAC_OS, TV_OS, or VISION_OS.")
+            throw BridgeError.invalidInput(String(localized: "platform must be IOS, MAC_OS, TV_OS, or VISION_OS.", bundle: .module, comment: "Input validation error for the platform parameter. Keep the JSON field name and App Store Connect enum values unchanged."))
         }
         return value
     }
@@ -577,7 +585,7 @@ private struct RequestPlan {
     private static func localeValue(_ value: String) throws -> String {
         guard value.count <= 20,
               value.range(of: "^[A-Za-z]{2,3}(?:-[A-Za-z0-9]{2,8})*$", options: .regularExpression) != nil else {
-            throw BridgeError.invalidInput("locale must be a valid App Store Connect locale code of at most 20 characters.")
+            throw BridgeError.invalidInput(String(localized: "locale must be a valid App Store Connect locale code of at most 20 characters.", bundle: .module, comment: "Input validation error for an App Store Connect locale code. Keep the JSON field name and limit unchanged."))
         }
         return value
     }
@@ -596,7 +604,7 @@ private struct RequestPlan {
         }
         if let keywords = try optionalString(arguments, "keywords") {
             guard keywords.utf8.count <= 100 else {
-                throw BridgeError.invalidInput("keywords must be at most 100 UTF-8 bytes.")
+                throw BridgeError.invalidInput(String(localized: "keywords must be at most 100 UTF-8 bytes.", bundle: .module, comment: "Input validation error for App Store keywords. Keep the JSON field name and byte limit unchanged."))
             }
             try validateTextControls(keywords, field: "keywords")
             attributes["keywords"] = .string(keywords)
@@ -631,14 +639,14 @@ private struct RequestPlan {
         guard (2...30).contains(value.count),
               !value.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty,
               !value.unicodeScalars.contains(where: CharacterSet.controlCharacters.contains) else {
-            throw BridgeError.invalidInput("name must contain 2 to 30 visible characters.")
+            throw BridgeError.invalidInput(String(localized: "name must contain 2 to 30 visible characters.", bundle: .module, comment: "Input validation error for an app name. Keep the JSON field name and character limits unchanged."))
         }
         return value
     }
 
     private static func boundedText(_ value: String, field: String, maximum: Int) throws -> String {
         guard value.count <= maximum else {
-            throw BridgeError.invalidInput("\(field) must be at most \(maximum) characters.")
+            throw BridgeError.invalidInput(String(localized: "\(field) must be at most \(maximum, format: .number.grouping(.never)) characters.", bundle: .module, comment: "Input validation error for a text field. Keep the interpolated JSON field name and ungrouped character limit unchanged."))
         }
         try validateTextControls(value, field: field)
         return value
@@ -648,13 +656,13 @@ private struct RequestPlan {
         guard !value.unicodeScalars.contains(where: {
             CharacterSet.controlCharacters.contains($0) && $0 != "\n" && $0 != "\r" && $0 != "\t"
         }) else {
-            throw BridgeError.invalidInput("\(field) contains unsupported control characters.")
+            throw BridgeError.invalidInput(String(localized: "\(field) contains unsupported control characters.", bundle: .module, comment: "Input validation error for control characters in a text field. Keep the interpolated JSON field name unchanged."))
         }
     }
 
     private static func validatedURL(_ value: String, field: String) throws -> String {
         guard value.count <= 2_000 else {
-            throw BridgeError.invalidInput("\(field) must be at most 2000 characters.")
+            throw BridgeError.invalidInput(String(localized: "\(field) must be at most 2000 characters.", bundle: .module, comment: "Input validation error for a URL field. Keep the interpolated JSON field name and character limit unchanged."))
         }
         if value.isEmpty { return value }
         guard !value.unicodeScalars.contains(where: { CharacterSet.whitespacesAndNewlines.contains($0) || CharacterSet.controlCharacters.contains($0) }),
@@ -663,7 +671,7 @@ private struct RequestPlan {
               let host = components.host, !host.isEmpty,
               components.user == nil, components.password == nil,
               components.url != nil else {
-            throw BridgeError.invalidInput("\(field) must be an absolute HTTP or HTTPS URL without credentials or whitespace.")
+            throw BridgeError.invalidInput(String(localized: "\(field) must be an absolute HTTP or HTTPS URL without credentials or whitespace.", bundle: .module, comment: "Input validation error for a URL field. Keep the interpolated JSON field name and URL schemes unchanged."))
         }
         return value
     }
@@ -672,14 +680,14 @@ private struct RequestPlan {
         guard (1...100).contains(value.count),
               !value.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty,
               !value.unicodeScalars.contains(where: CharacterSet.controlCharacters.contains) else {
-            throw BridgeError.invalidInput("\(field) must contain 1 to 100 visible characters.")
+            throw BridgeError.invalidInput(String(localized: "\(field) must contain 1 to 100 visible characters.", bundle: .module, comment: "Input validation error for a filter value. Keep the interpolated JSON field name and character limits unchanged."))
         }
         return value
     }
 
     private static func enumValue(_ value: String, allowed: [String], field: String) throws -> String {
         guard allowed.contains(value) else {
-            throw BridgeError.invalidInput("\(field) must be one of the supported values.")
+            throw BridgeError.invalidInput(String(localized: "\(field) must be one of the supported values.", bundle: .module, comment: "Input validation error for a constrained enum parameter. Keep the interpolated JSON field name unchanged."))
         }
         return value
     }
@@ -721,7 +729,7 @@ private actor URLSessionHTTPTransport: ASCHTTPTransport {
         for (name, value) in request.headers { urlRequest.setValue(value, forHTTPHeaderField: name) }
         let (data, response) = try await session.data(for: urlRequest)
         guard let http = response as? HTTPURLResponse else {
-            throw BridgeError.transport("App Store Connect returned an invalid HTTP response.")
+            throw BridgeError.transport(String(localized: "App Store Connect returned an invalid HTTP response.", bundle: .module, comment: "Shown when URLSession returns a response that is not an HTTP response."))
         }
         return ASCHTTPResponse(statusCode: http.statusCode, data: data)
     }

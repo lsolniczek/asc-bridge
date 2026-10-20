@@ -1,0 +1,583 @@
+{
+  "sourceLanguage": "en",
+  "strings": {
+    "%@ contains unsupported control characters.": {
+      "comment": "Input validation error for control characters in a text field. Keep the interpolated JSON field name unchanged.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ contains unsupported control characters."
+          }
+        }
+      },
+      "substitutions": {
+        "field": {
+          "argNum": 1,
+          "formatSpecifier": "@",
+          "variations": {}
+        }
+      }
+    },
+    "%@ must be a safe App Store Connect resource ID.": {
+      "comment": "Input validation error for an App Store Connect resource ID. The interpolated value is a JSON argument name and must remain unchanged.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ must be a safe App Store Connect resource ID."
+          }
+        }
+      },
+      "substitutions": {
+        "key": {
+          "argNum": 1,
+          "formatSpecifier": "@",
+          "variations": {}
+        }
+      }
+    },
+    "%@ must be a string.": {
+      "comment": "Input validation error for an argument's type. The interpolated value is a JSON argument name and must remain unchanged.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ must be a string."
+          }
+        }
+      },
+      "substitutions": {
+        "key": {
+          "argNum": 1,
+          "formatSpecifier": "@",
+          "variations": {}
+        }
+      }
+    },
+    "%@ must be an absolute HTTP or HTTPS URL without credentials or whitespace.": {
+      "comment": "Input validation error for a URL field. Keep the interpolated JSON field name and URL schemes unchanged.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ must be an absolute HTTP or HTTPS URL without credentials or whitespace."
+          }
+        }
+      },
+      "substitutions": {
+        "field": {
+          "argNum": 1,
+          "formatSpecifier": "@",
+          "variations": {}
+        }
+      }
+    },
+    "%@ must be at most %@ characters.": {
+      "comment": "Input validation error for a text field. Keep the interpolated JSON field name and character limit unchanged.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ must be at most %@ characters."
+          }
+        }
+      },
+      "substitutions": {
+        "field": {
+          "argNum": 1,
+          "formatSpecifier": "@",
+          "variations": {}
+        },
+        "maximum": {
+          "argNum": 2,
+          "formatSpecifier": "lld",
+          "variations": {}
+        }
+      }
+    },
+    "%@ must be at most 2000 characters.": {
+      "comment": "Input validation error for a URL field. Keep the interpolated JSON field name and character limit unchanged.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ must be at most 2000 characters."
+          }
+        }
+      },
+      "substitutions": {
+        "field": {
+          "argNum": 1,
+          "formatSpecifier": "@",
+          "variations": {}
+        }
+      }
+    },
+    "%@ must be one of the supported values.": {
+      "comment": "Input validation error for a constrained enum parameter. Keep the interpolated JSON field name unchanged.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ must be one of the supported values."
+          }
+        }
+      },
+      "substitutions": {
+        "field": {
+          "argNum": 1,
+          "formatSpecifier": "@",
+          "variations": {}
+        }
+      }
+    },
+    "%@ must contain 1 to 100 visible characters.": {
+      "comment": "Input validation error for a filter value. Keep the interpolated JSON field name and character limits unchanged.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ must contain 1 to 100 visible characters."
+          }
+        }
+      },
+      "substitutions": {
+        "field": {
+          "argNum": 1,
+          "formatSpecifier": "@",
+          "variations": {}
+        }
+      }
+    },
+    "Add your App Store Connect API key in ASC Bridge first.": {
+      "comment": "Shown when a request needs App Store Connect credentials that have not been added yet.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Add your App Store Connect API key in ASC Bridge first."
+          }
+        }
+      }
+    },
+    "App Store Connect (HTTP %@): %@": {
+      "comment": "Prefix for an App Store Connect HTTP error. Keep the HTTP status ungrouped and the supplied Apple error text unchanged.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "App Store Connect (HTTP %@): %@"
+          }
+        }
+      },
+      "substitutions": {
+        "message": {
+          "argNum": 2,
+          "formatSpecifier": "@",
+          "variations": {}
+        },
+        "status": {
+          "argNum": 1,
+          "formatSpecifier": "lld",
+          "variations": {}
+        }
+      }
+    },
+    "App Store Connect redirected the request. Redirects are blocked for security.": {
+      "comment": "Shown when App Store Connect responds with a redirect, which the client blocks for security.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "App Store Connect redirected the request. Redirects are blocked for security."
+          }
+        }
+      }
+    },
+    "App Store Connect returned a response without resource data.": {
+      "comment": "Shown when an App Store Connect response does not contain its required data field.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "App Store Connect returned a response without resource data."
+          }
+        }
+      }
+    },
+    "App Store Connect returned an invalid HTTP response.": {
+      "comment": "Shown when URLSession returns a response that is not an HTTP response.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "App Store Connect returned an invalid HTTP response."
+          }
+        }
+      }
+    },
+    "App Store Connect returned an unreadable response.": {
+      "comment": "Shown when a successful App Store Connect response is not valid JSON.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "App Store Connect returned an unreadable response."
+          }
+        }
+      }
+    },
+    "Apple could not process the request.": {
+      "comment": "Fallback shown when an unsuccessful Apple response does not contain a usable error message.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Apple could not process the request."
+          }
+        }
+      }
+    },
+    "Apple error code %@": {
+      "comment": "Label for an Apple API error code. Keep the interpolated code unchanged.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Apple error code %@"
+          }
+        }
+      },
+      "substitutions": {
+        "code": {
+          "argNum": 1,
+          "formatSpecifier": "@",
+          "variations": {}
+        }
+      }
+    },
+    "Issuer ID must be a valid UUID.": {
+      "comment": "Credential validation error shown when the App Store Connect issuer ID is not a UUID.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Issuer ID must be a valid UUID."
+          }
+        }
+      }
+    },
+    "Key ID must contain 10 alphanumeric characters.": {
+      "comment": "Credential validation error shown when an App Store Connect key ID has the wrong format.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Key ID must contain 10 alphanumeric characters."
+          }
+        }
+      }
+    },
+    "Keychain access failed (%@).": {
+      "comment": "Shown when macOS Keychain access fails. Keep the interpolated OSStatus code unchanged and ungrouped.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Keychain access failed (%@)."
+          }
+        }
+      },
+      "substitutions": {
+        "status": {
+          "argNum": 1,
+          "formatSpecifier": "d",
+          "variations": {}
+        }
+      }
+    },
+    "Provide at least one app info localization metadata field.": {
+      "comment": "Input validation error shown when an update includes no app information localization fields.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Provide at least one app info localization metadata field."
+          }
+        }
+      }
+    },
+    "Provide at least one localization metadata field.": {
+      "comment": "Input validation error shown when an update includes no App Store version localization fields.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Provide at least one localization metadata field."
+          }
+        }
+      }
+    },
+    "The App Store Connect credentials could not be saved.": {
+      "comment": "Shown when credentials cannot be encoded before saving them to Keychain.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The App Store Connect credentials could not be saved."
+          }
+        }
+      }
+    },
+    "The App Store Connect request URL could not be created.": {
+      "comment": "Shown when the client cannot construct the fixed App Store Connect API URL.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The App Store Connect request URL could not be created."
+          }
+        }
+      }
+    },
+    "The App Store Connect request URL is invalid.": {
+      "comment": "Shown when the constructed App Store Connect API URL fails security validation.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The App Store Connect request URL is invalid."
+          }
+        }
+      }
+    },
+    "The App Store Connect request could not be signed.": {
+      "comment": "Shown when the client cannot sign an App Store Connect request.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The App Store Connect request could not be signed."
+          }
+        }
+      }
+    },
+    "The MCP request could not be recorded. The operation was not started.": {
+      "comment": "Shown when audit history cannot be saved before an MCP operation begins.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The MCP request could not be recorded. The operation was not started."
+          }
+        }
+      }
+    },
+    "The key file must contain a valid P-256 private key in PEM format.": {
+      "comment": "Credential validation error shown when the imported key is not a valid P-256 PEM private key.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The key file must contain a valid P-256 private key in PEM format."
+          }
+        }
+      }
+    },
+    "The request contains an unknown argument.": {
+      "comment": "Input validation error shown when a typed operation receives an unsupported JSON argument.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The request contains an unknown argument."
+          }
+        }
+      }
+    },
+    "The saved App Store Connect credentials could not be read. Reimport the team key.": {
+      "comment": "Shown when saved credentials cannot be decoded. The user can import their team key again in the app.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The saved App Store Connect credentials could not be read. Reimport the team key."
+          }
+        }
+      }
+    },
+    "The saved App Store Connect private key is invalid.": {
+      "comment": "Shown when a previously saved App Store Connect private key can no longer be parsed.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The saved App Store Connect private key is invalid."
+          }
+        }
+      }
+    },
+    "cursor must be at most 2048 characters and contain no control characters.": {
+      "comment": "Input validation error for the pagination cursor. Keep the JSON field name and limit unchanged.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "cursor must be at most 2048 characters and contain no control characters."
+          }
+        }
+      }
+    },
+    "keywords must be at most 100 UTF-8 bytes.": {
+      "comment": "Input validation error for App Store keywords. Keep the JSON field name and byte limit unchanged.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "keywords must be at most 100 UTF-8 bytes."
+          }
+        }
+      }
+    },
+    "limit must be an integer from 1 to 200.": {
+      "comment": "Input validation error for the pagination limit. Keep the JSON field name unchanged.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "limit must be an integer from 1 to 200."
+          }
+        }
+      }
+    },
+    "locale must be a valid App Store Connect locale code of at most 20 characters.": {
+      "comment": "Input validation error for an App Store Connect locale code. Keep the JSON field name and limit unchanged.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "locale must be a valid App Store Connect locale code of at most 20 characters."
+          }
+        }
+      }
+    },
+    "name must contain 2 to 30 visible characters.": {
+      "comment": "Input validation error for an app name. Keep the JSON field name and character limits unchanged.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "name must contain 2 to 30 visible characters."
+          }
+        }
+      }
+    },
+    "platform must be IOS, MAC_OS, TV_OS, or VISION_OS.": {
+      "comment": "Input validation error for the platform parameter. Keep the JSON field name and App Store Connect enum values unchanged.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "platform must be IOS, MAC_OS, TV_OS, or VISION_OS."
+          }
+        }
+      }
+    },
+    "processingState must be PROCESSING, FAILED, INVALID, or VALID.": {
+      "comment": "Input validation error for the processingState filter. Keep the JSON field name and allowed API values unchanged.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "processingState must be PROCESSING, FAILED, INVALID, or VALID."
+          }
+        }
+      }
+    },
+    "rating must be an integer from 1 to 5.": {
+      "comment": "Input validation error for a customer review rating filter. Keep the JSON field name unchanged.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "rating must be an integer from 1 to 5."
+          }
+        }
+      }
+    },
+    "responseBody must not be empty or whitespace only.": {
+      "comment": "Input validation error for a public App Store customer review response. Keep the JSON field name unchanged.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "responseBody must not be empty or whitespace only."
+          }
+        }
+      }
+    },
+    "territory must be a three-letter uppercase country code.": {
+      "comment": "Input validation error for the territory filter. Keep the JSON field name unchanged.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "territory must be a three-letter uppercase country code."
+          }
+        }
+      }
+    },
+    "versionString must be 1 to 18 visible characters.": {
+      "comment": "Input validation error for an App Store version string. Keep the JSON field name unchanged.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "versionString must be 1 to 18 visible characters."
+          }
+        }
+      }
+    }
+  },
+  "version": "1.0"
+}

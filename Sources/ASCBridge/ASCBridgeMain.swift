@@ -71,7 +71,7 @@ struct ASCBridgeApp: App {
     @StateObject private var model = AppModel()
 
     var body: some Scene {
-        WindowGroup("ASC Bridge", id: "main") {
+        WindowGroup(Text("ASC Bridge", bundle: .module), id: "main") {
             MainView(model: model)
                 .frame(minWidth: 900, minHeight: 650)
                 .task { await model.start() }
@@ -79,7 +79,9 @@ struct ASCBridgeApp: App {
         .defaultSize(width: 1040, height: 740)
         .commands {
             CommandGroup(replacing: .appInfo) {
-                Button("O ASC Bridge") { NSApplication.shared.orderFrontStandardAboutPanel() }
+                Button { NSApplication.shared.orderFrontStandardAboutPanel() } label: {
+                    Text("About ASC Bridge", bundle: .module)
+                }
             }
         }
     }

@@ -13,8 +13,9 @@ Small local macOS app: Keychain credentials → App Store Connect client → MCP
 - `Sources/ASCBridge`: SwiftUI app and composition.
 
 ## Verification
-- `swift test` (synthetic credentials and stubbed Apple HTTP only).
-- `swift build -c release`.
+- `swift test --build-system swiftbuild` (synthetic credentials and stubbed Apple HTTP only).
+- `swift build --build-system swiftbuild -c release`.
+- `python3 scripts/localizations.py check` after the debug build; String Catalogs require Swift Build.
 - `./scripts/check.sh` for the local quality gate once available.
 - Review the real integrated diff with a fresh read-only worker before completion.
 

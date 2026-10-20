@@ -14,21 +14,25 @@ struct MainView: View {
                     Image(systemName: "app.connected.to.app.below.fill")
                         .font(.system(size: 27)).foregroundStyle(.blue)
                     VStack(alignment: .leading, spacing: 3) {
-                        Text("ASC Bridge").font(.headline)
-                        Text("Apple ↔ Twój agent").font(.caption).foregroundStyle(.secondary)
+                        Text("ASC Bridge", bundle: .module).font(.headline)
+                        Text("Apple ↔ your agent", bundle: .module).font(.caption).foregroundStyle(.secondary)
                     }
                 }
                 .padding(.horizontal, 14).padding(.top, 20)
                 List(selection: $selection) {
-                    Label("Połączenie", systemImage: "key.horizontal").tag(Section.connection)
-                    Label("Historia MCP", systemImage: "clock.arrow.circlepath").tag(Section.history)
+                    Label { Text("Connection", bundle: .module) } icon: { Image(systemName: "key.horizontal") }
+                        .tag(Section.connection)
+                    Label { Text("MCP History", bundle: .module) } icon: { Image(systemName: "clock.arrow.circlepath") }
+                        .tag(Section.history)
                 }
                 .listStyle(.sidebar)
                 Spacer(minLength: 0)
                 VStack(alignment: .leading, spacing: 8) {
-                    Label(model.serverState.label, systemImage: model.serverState == .running ? "circle.fill" : "circle")
-                        .font(.caption).foregroundStyle(model.serverState == .running ? .green : .secondary)
-                    Text("Działa na tym Macu")
+                    Label { Text(model.serverState.label) } icon: {
+                        Image(systemName: model.serverState == .running ? "circle.fill" : "circle")
+                    }
+                    .font(.caption).foregroundStyle(model.serverState == .running ? .green : .secondary)
+                    Text("Running on this Mac", bundle: .module)
                         .font(.caption2).foregroundStyle(.secondary)
                 }
                 .padding(16)
@@ -54,86 +58,113 @@ struct ConnectionView: View {
         ScrollView {
             VStack(alignment: .leading, spacing: 24) {
                 VStack(alignment: .leading, spacing: 8) {
-                    Text("App Store Connect dla Twojego agenta")
+                    Text("App Store Connect for your agent", bundle: .module)
                         .font(.system(size: 27, weight: .semibold))
-                    Text("Dodaj klucz zespołu. Agent otrzyma narzędzia do wersji i tekstów w App Store.")
+                    Text("Give your agent access to app metadata, builds, TestFlight, and reviews.", bundle: .module)
                         .foregroundStyle(.secondary)
                 }
                 HStack(spacing: 16) {
-                    statusCard(title: "Klucz Apple", value: model.hasCredentials ? "Zapisany w Keychain" : "Czeka na dodanie",
-                               symbol: model.hasCredentials ? "checkmark.shield.fill" : "key.fill",
-                               color: model.hasCredentials ? .green : .orange)
-                    statusCard(title: "Połączenie MCP", value: model.serverState.label,
-                               symbol: "network", color: model.serverState == .running ? .blue : .secondary)
+                    statusCard(
+                        title: String(localized: "Apple Key", bundle: .module, comment: "Status card title for the App Store Connect API key."),
+                        value: model.hasCredentials
+                            ? String(localized: "Saved in Keychain", bundle: .module, comment: "Status shown when credentials are saved.")
+                            : String(localized: "Waiting for a key", bundle: .module, comment: "Status shown when credentials have not been added."),
+                        symbol: model.hasCredentials ? "checkmark.shield.fill" : "key.fill",
+                        color: model.hasCredentials ? .green : .orange
+                    )
+                    statusCard(
+                        title: String(localized: "MCP Connection", bundle: .module, comment: "Status card title for the local MCP server."),
+                        value: model.serverState.label,
+                        symbol: "network", color: model.serverState == .running ? .blue : .secondary
+                    )
                 }
                 GroupBox {
                     VStack(alignment: .leading, spacing: 16) {
-                        Text("Klucz zespołu").font(.headline)
+                        Text("App Store Connect team key", bundle: .module).font(.headline)
                         Grid(alignment: .leading, horizontalSpacing: 18, verticalSpacing: 12) {
                             GridRow {
-                                Text("Key ID").foregroundStyle(.secondary)
-                                TextField("ABC123DE45", text: $model.keyID).textFieldStyle(.roundedBorder)
+                                Text("Key ID", bundle: .module).foregroundStyle(.secondary)
+                                TextField(text: $model.keyID, prompt: Text(verbatim: "ABC123DE45")) {
+                                    Text("Key ID", bundle: .module)
+                                }
+                                    .labelsHidden().textFieldStyle(.roundedBorder)
+                                    .accessibilityLabel(Text("Key ID", bundle: .module))
                             }
                             GridRow {
-                                Text("Issuer ID").foregroundStyle(.secondary)
-                                TextField("Identyfikator wystawcy z ASC", text: $model.issuerID).textFieldStyle(.roundedBorder)
+                                Text("Issuer ID", bundle: .module).foregroundStyle(.secondary)
+                                TextField(text: $model.issuerID, prompt: Text("Issuer ID from App Store Connect", bundle: .module)) {
+                                    Text("Issuer ID", bundle: .module)
+                                }
+                                .labelsHidden().textFieldStyle(.roundedBorder)
+                                .accessibilityLabel(Text("Issuer ID", bundle: .module))
                             }
                             GridRow {
-                                Text("Klucz .p8").foregroundStyle(.secondary)
+                                Text("Private Key (.p8)", bundle: .module).foregroundStyle(.secondary)
                                 HStack(spacing: 12) {
-                                    Button("Wybierz plik…", action: model.importKey)
-                                    Text(model.importedFileName ?? (model.hasCredentials ? "Klucz jest już zapisany" : "Nie wybrano pliku"))
+                                    Button { model.importKey() } label: { Text("Choose File…", bundle: .module) }
+                                    Text(model.importedFileName ?? (model.hasCredentials
+                                        ? String(localized: "Key is already saved", bundle: .module, comment: "Shown when a key is saved and no new key file is selected.")
+                                        : String(localized: "No file selected", bundle: .module, comment: "Shown before a key file is selected.")))
                                         .font(.callout).foregroundStyle(.secondary).lineLimit(1)
                                 }
                             }
                         }
                         HStack(spacing: 12) {
-                            Button("Zapisz w Keychain") { Task { await model.saveCredentials() } }
-                                .buttonStyle(.borderedProminent)
-                                .disabled(model.importedFileName == nil || model.isBusy)
-                            Button("Testuj zapisany klucz") { Task { await model.testConnection() } }
-                                .disabled(!model.hasCredentials || model.isBusy)
+                            Button { Task { await model.saveCredentials() } } label: {
+                                Text("Save to Keychain", bundle: .module)
+                            }
+                            .buttonStyle(.borderedProminent)
+                            .disabled(model.importedFileName == nil || model.isBusy)
+                            Button { Task { await model.testConnection() } } label: {
+                                Text("Test saved key", bundle: .module)
+                            }
+                            .disabled(!model.hasCredentials || model.isBusy)
                             Spacer()
                             if model.hasCredentials {
-                                Button("Usuń klucz", role: .destructive) { Task { await model.deleteCredentials() } }
-                                    .disabled(model.isBusy)
+                                Button(role: .destructive) { Task { await model.deleteCredentials() } } label: {
+                                    Text("Delete Key", bundle: .module)
+                                }
+                                .disabled(model.isBusy)
                             }
                             if model.isBusy { ProgressView().controlSize(.small) }
                         }
-                        Text("Klucz prywatny i tokeny Apple pozostają w aplikacji. Nie są przekazywane agentowi.")
+                        Text("Your private key and Apple tokens stay in this app. They are never shared with your agent.", bundle: .module)
                             .font(.caption).foregroundStyle(.secondary)
                     }
                     .padding(12)
                 }
                 GroupBox {
                     VStack(alignment: .leading, spacing: 14) {
-                        Text("Podłącz agenta przez MCP").font(.headline)
+                        Text("Connect your agent with MCP", bundle: .module).font(.headline)
                         Text(model.endpoint).font(.system(.callout, design: .monospaced)).textSelection(.enabled)
-                        Text("Skopiuj konfigurację do ~/.codex/config.toml. Zawiera osobny token MCP; klucz Apple pozostaje w Keychain. W innym kliencie MCP użyj tego samego adresu i nagłówka Authorization.")
+                        Text("Copy this configuration to ~/.codex/config.toml. It contains a separate MCP token; the Apple key stays in Keychain. For another MCP client, use the same URL and Authorization header.", bundle: .module)
                             .font(.callout).foregroundStyle(.secondary).fixedSize(horizontal: false, vertical: true)
                         Button { model.copyConfiguration() } label: {
-                            Label("Skopiuj konfigurację Codexa", systemImage: "doc.on.doc")
+                            Label { Text("Copy Codex configuration", bundle: .module) } icon: { Image(systemName: "doc.on.doc") }
                         }
                         .disabled(model.serverState != .running)
                         Divider()
-                        Text("Agent może tworzyć wersje oraz dodawać i zmieniać opisy, „Co nowego” i tekst promocyjny. Zmiany wykonują się od razu. Wszystkie wywołania MCP zobaczysz w historii.")
+                        Text("Your agent can manage app metadata, versions, localizations, builds, and TestFlight testing details, and read reviews or post public replies. Changes take effect immediately, with no in-app confirmation. Review replies are visible to customers. Every MCP request appears in History.", bundle: .module)
                             .font(.callout).foregroundStyle(.secondary).fixedSize(horizontal: false, vertical: true)
                     }
                     .padding(12)
                 }
                 if let error = model.serverError {
-                    Label(error, systemImage: "exclamationmark.triangle.fill").foregroundStyle(.red).font(.callout)
+                    Label { Text(error) } icon: { Image(systemName: "exclamationmark.triangle.fill") }
+                        .foregroundStyle(.red).font(.callout)
                 }
             }
             .padding(32).frame(maxWidth: 900, alignment: .leading)
         }
         .safeAreaInset(edge: .bottom) {
             if let message = model.notice {
-                Label(message, systemImage: model.noticeIsError ? "exclamationmark.circle.fill" : "checkmark.circle.fill")
-                    .foregroundStyle(model.noticeIsError ? .red : .green)
-                    .font(.callout).textSelection(.enabled)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding(16).background(.bar)
+                Label { Text(message) } icon: {
+                    Image(systemName: model.noticeIsError ? "exclamationmark.circle.fill" : "checkmark.circle.fill")
+                }
+                .foregroundStyle(model.noticeIsError ? .red : .green)
+                .font(.callout).textSelection(.enabled)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(16).background(.bar)
             }
         }
     }

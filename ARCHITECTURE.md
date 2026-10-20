@@ -14,6 +14,12 @@ request intent and completion records and provides a history projection to Swift
 Public contracts are in `Sources/BridgeCore/Contracts.swift`. Cross-module changes
 must preserve these or be coordinated by the manager.
 
+Native app text uses Apple's String Catalogs: `ASCBridge` owns the SwiftUI catalog
+and `BridgeCore` owns shared user-facing messages. English is the source and default
+language. Each SwiftPM target loads its own resources through `Bundle.module`; the
+app build packages both resource bundles and advertises the locales compiled in the
+app catalog. See [the localization guide](docs/localization.md) for the workflow.
+
 Persistent state: private ASC credential and separate local MCP token in Keychain;
 audit JSONL under Application Support/ASCBridge with owner-only permissions.
 No database, account service, telemetry backend or cloud hosting.

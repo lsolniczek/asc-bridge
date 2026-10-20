@@ -19,27 +19,34 @@ struct HistoryView: View {
             VStack(alignment: .leading, spacing: 14) {
                 HStack {
                     VStack(alignment: .leading, spacing: 6) {
-                        Text("Historia MCP").font(.system(size: 27, weight: .semibold))
-                        Text("Ostatnie 500 wywołań. Pełna historia jest zapisana na tym Macu.")
+                        Text("MCP History", bundle: .module).font(.system(size: 27, weight: .semibold))
+                        Text("Showing the last 500 calls. Full history is saved on this Mac.", bundle: .module)
                             .font(.callout).foregroundStyle(.secondary)
                     }
                     Spacer()
                     Button { model.revealHistory() } label: { Image(systemName: "folder") }
-                        .help("Pokaż plik historii w Finderze")
+                        .help(Text("Show history file in Finder", bundle: .module))
                     Button { Task { await model.refreshHistory() } } label: { Image(systemName: "arrow.clockwise") }
-                        .help("Odśwież historię")
+                        .help(Text("Refresh history", bundle: .module))
                 }
-                TextField("Szukaj narzędzia, metody lub wyniku", text: $search).textFieldStyle(.roundedBorder)
+                TextField(text: $search, prompt: Text("Search tools, methods, or results", bundle: .module)) {
+                    Text("Search tools, methods, or results", bundle: .module)
+                }
+                .textFieldStyle(.roundedBorder)
                 if let error = model.historyError {
-                    Label(error, systemImage: "exclamationmark.circle").font(.callout).foregroundStyle(.red)
+                    Label { Text(error) } icon: { Image(systemName: "exclamationmark.circle") }
+                        .font(.callout).foregroundStyle(.red)
                 }
             }
             .padding(24)
             Divider()
             if model.entries.isEmpty {
-                ContentUnavailableView("Historia jest pusta", systemImage: "clock.arrow.circlepath",
-                    description: Text("Podłącz agenta. Tutaj pojawią się wywołania narzędzi, błędy i pozostałe żądania MCP."))
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                ContentUnavailableView(
+                    String(localized: "No history yet", bundle: .module, comment: "Empty-state title shown before any MCP requests are recorded."),
+                    systemImage: "clock.arrow.circlepath",
+                    description: Text("Connect an agent to see tool calls, errors, and other MCP requests here.", bundle: .module)
+                )
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
             } else {
                 HSplitView {
                     List(selection: $selection) {
@@ -51,9 +58,12 @@ struct HistoryView: View {
                     if let entry = model.entries.first(where: { $0.id == selection }) {
                         HistoryDetail(entry: entry).frame(minWidth: 260, maxWidth: .infinity)
                     } else {
-                        ContentUnavailableView("Wybierz wywołanie", systemImage: "text.alignleft",
-                            description: Text("Zobaczysz parametry, czas wykonania i wynik."))
-                            .frame(minWidth: 260, maxWidth: .infinity, maxHeight: .infinity)
+                        ContentUnavailableView(
+                            String(localized: "Select a request", bundle: .module, comment: "Empty-state title shown until a history entry is selected."),
+                            systemImage: "text.alignleft",
+                            description: Text("View its parameters, duration, and result.", bundle: .module)
+                        )
+                        .frame(minWidth: 260, maxWidth: .infinity, maxHeight: .infinity)
                     }
                 }
             }
@@ -71,7 +81,9 @@ private struct HistoryRow: View {
                 HStack {
                     Text(entry.startedAt, format: .dateTime.day().month().hour().minute().second())
                     Spacer()
-                    if let duration = entry.durationMS { Text("\(Int(duration)) ms") }
+                    if let duration = entry.durationMS {
+                        Text(String(localized: "\(Int(duration)) ms", bundle: .module, comment: "Elapsed time in milliseconds, shown in a history row."))
+                    }
                 }
                 .font(.caption).foregroundStyle(.secondary)
             }
@@ -86,23 +98,36 @@ private struct HistoryDetail: View {
         ScrollView {
             VStack(alignment: .leading, spacing: 18) {
                 Text(entry.toolName ?? entry.method).font(.headline).textSelection(.enabled)
-                Label(statusLabel(entry.status), systemImage: statusSymbol(entry.status)).foregroundStyle(statusColor(entry.status))
-                LabeledContent("Czas", value: entry.startedAt.formatted(date: .abbreviated, time: .standard))
-                LabeledContent("Metoda", value: entry.method)
-                if let requestID = entry.requestID { LabeledContent("ID żądania", value: requestID) }
-                if let duration = entry.durationMS { LabeledContent("Czas wykonania", value: "\(Int(duration)) ms") }
+                Label { Text(statusLabel(entry.status)) } icon: {
+                    Image(systemName: statusSymbol(entry.status))
+                }
+                .foregroundStyle(statusColor(entry.status))
+                LabeledContent {
+                    Text(entry.startedAt.formatted(date: .abbreviated, time: .standard))
+                } label: { Text("Time", bundle: .module) }
+                LabeledContent {
+                    Text(entry.method)
+                } label: { Text("Method", bundle: .module) }
+                if let requestID = entry.requestID {
+                    LabeledContent { Text(requestID) } label: { Text("Request ID", bundle: .module) }
+                }
+                if let duration = entry.durationMS {
+                    LabeledContent {
+                        Text(String(localized: "\(Int(duration)) ms", bundle: .module, comment: "Elapsed time in milliseconds, shown in request details."))
+                    } label: { Text("Duration", bundle: .module) }
+                }
                 if entry.status == "pending" {
-                    Text("Brak zapisanego zakończenia. Wywołanie może być w toku lub zostało przerwane. Przed powtórzeniem zmiany sprawdź stan w ASC.")
+                    Text("No completion was recorded. The request may still be running or may have been interrupted. Check its status in App Store Connect before repeating a change.", bundle: .module)
                         .font(.callout).foregroundStyle(.secondary)
                 }
                 if let summary = entry.summary {
                     Divider()
-                    Text("Wynik").font(.subheadline.weight(.semibold))
+                    Text("Result", bundle: .module).font(.subheadline.weight(.semibold))
                     Text(summary).font(.callout).textSelection(.enabled)
                 }
                 Divider()
-                Text("Parametry").font(.subheadline.weight(.semibold))
-                Text((try? entry.parameters?.encodedString(pretty: true)) ?? "Brak parametrów")
+                Text("Parameters", bundle: .module).font(.subheadline.weight(.semibold))
+                Text((try? entry.parameters?.encodedString(pretty: true)) ?? String(localized: "No parameters", bundle: .module, comment: "Shown when a history request has no recorded parameters."))
                     .font(.system(.caption, design: .monospaced)).textSelection(.enabled)
                     .frame(maxWidth: .infinity, alignment: .leading)
             }
@@ -113,10 +138,10 @@ private struct HistoryDetail: View {
 
 private func statusLabel(_ status: String) -> String {
     switch status {
-    case "success": "Wykonano"
-    case "error": "Błąd"
-    case "rejected": "Odrzucono"
-    default: "W toku / brak zakończenia"
+    case "success": String(localized: "Completed", bundle: .module, comment: "MCP request status label.")
+    case "error": String(localized: "Error", bundle: .module, comment: "MCP request status label.")
+    case "rejected": String(localized: "Rejected", bundle: .module, comment: "MCP request status label.")
+    default: String(localized: "Pending or incomplete", bundle: .module, comment: "MCP request status label for a request without a recorded completion.")
     }
 }
 

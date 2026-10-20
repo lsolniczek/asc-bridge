@@ -32,6 +32,15 @@ Keychain access. The normal application listens on port 43129.
   `python3 scripts/smoke-mcp.py "dist/ASC Bridge.app/Contents/MacOS/ASCBridge"`.
 - Update the endpoint documentation and both READMEs when changing user-facing tools.
 
+### Translating the app
+
+The source language is English. Native app text is stored in the Apple String
+Catalogs in `Sources/ASCBridge/Resources` and
+`Sources/BridgeCore/Resources`. Follow [the localization guide](docs/localization.md)
+when editing copy or adding a language. Build with Swift Build so the catalogs
+are compiled, then use the repository's catalog sync and coverage checks. Keep
+protocol names, API field names, enum values and user-provided metadata unchanged.
+
 Use `Package.resolved` for reproducible dependency versions. After an intentional
 dependency update, run `swift package resolve`, regenerate the notices with
 `python3 scripts/update-third-party-notices.py`, and include both resulting files.

@@ -4,12 +4,14 @@ A local macOS app that gives MCP clients typed access to App Store Connect while
 keeping the Apple private key inside the app's Keychain-backed credential boundary.
 
 [Polski](README.pl.md) · [Endpoint reference](docs/endpoints.md) ·
-[Contributing](CONTRIBUTING.md) · [Security](SECURITY.md) · [MIT license](LICENSE)
+[Contributing](CONTRIBUTING.md) · [Localization](docs/localization.md) ·
+[Security](SECURITY.md) · [MIT license](LICENSE)
 
 ![ASC Bridge onboarding, shown with empty credential fields](docs/images/onboarding.png)
 
-The native interface is currently in Polish. The MCP tool descriptions and API
-reference are in English.
+The native interface uses English by default. Its text lives in Apple's String
+Catalogs and is ready for additional translations. The MCP protocol and API
+reference use English.
 
 ## What it does
 
@@ -53,9 +55,9 @@ binary release or automatic updates.
 1. Create or use an App Store Connect **team API key** with the permissions needed
    for your operations. Apple describes [creating API keys](https://developer.apple.com/documentation/appstoreconnectapi/creating-api-keys-for-app-store-connect-api).
 2. In ASC Bridge, enter the Key ID and Issuer ID, select the `.p8` file, and click
-   **Zapisz w Keychain** (Save in Keychain).
-3. Click **Testuj zapisany klucz** (Test saved key).
-4. For Codex, use **Skopiuj konfigurację Codexa** (Copy Codex configuration) and
+   **Save to Keychain**.
+3. Click **Test saved key**.
+4. For Codex, use **Copy Codex configuration** and
    add the copied configuration to your client's local MCP settings. For another
    MCP client, select Streamable HTTP, use the endpoint above and the separate
    `Authorization` bearer value from the app's copied configuration.
@@ -114,7 +116,7 @@ Example prompts:
 
 ## Local history and security
 
-The **Historia MCP** tab shows methods, tools, parameters, timing, results and
+The **MCP History** tab shows methods, tools, parameters, timing, results and
 failures. The app stores owner-only JSONL history under:
 
 ```text
@@ -151,7 +153,8 @@ harness uses port 43130 and temporary history, never a real Keychain or Apple ac
 
 The project uses SwiftPM: `BridgeCore` implements contracts, credentials and Apple
 requests; `BridgeMCP` implements tools, transport and audit; `ASCBridge` composes the
-SwiftUI app. Start with [ARCHITECTURE.md](ARCHITECTURE.md),
+SwiftUI app. The [localization guide](docs/localization.md) explains the native
+String Catalog workflow. Start with [ARCHITECTURE.md](ARCHITECTURE.md),
 [CONTRIBUTING.md](CONTRIBUTING.md) and the [changelog](CHANGELOG.md).
 
 For maintainer setup and the first public push, see [Publishing](docs/publishing.md).
